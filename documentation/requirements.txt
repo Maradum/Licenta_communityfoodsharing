@@ -1,0 +1,13 @@
+Community Food Sharing, o platformă destinată conectării persoanelor care au alimente în exces cu cele care au nevoie de ele. Scopul principal este de a reduce risipa alimentară și de a facilita distribuția hranei în comunități locale din Marea Britanie, in limba engleza dar care cu ajutorul Chatgpt poate fi tradusa in toate limbile.
+Funcționalități principale:
+Postări cu valabilitate limitată – utilizatorii pot oferi sau solicita alimente, iar fiecare anunț are un timp de expirare (1 zi, 3 zile sau 1 săptămână).
+Roluri diferite pentru utilizatori – două tipuri de conturi: donatori și beneficiari.
+Localizare pe orașe – platforma permite filtrarea anunțurilor în funcție de orașele mari din UK.
+Integrare ChatGPT – un chatbot interactiv care ajută utilizatorii să navigheze pe site și să găsească informațiile de care au nevoie. De exemplu eu folosesc nr de telefon de ChatGPTdirect in WhatsApp si mi-ar placea sa il pot folosi in website.
+Funcționalitate Text-to-Speech – pentru a ajuta persoanele mai în vârstă sau cele cu dizabilități să acceseze mai ușor conținutul.
+Opțiune Dial-in – utilizatorii care nu sunt familiarizați cu tehnologia pot apela un număr și asculta anunțurile disponibile.
+Tehnologiile utilizate: Studio Visual Code
+ Frontend: React.js + HTML, CSS
+Backend: (Încă în discuție – poate fi Node.js )
+Baza de date: SQL sau MongoDB 
+ Hosting & Deployment: Posibil pe Vercel/Heroku
