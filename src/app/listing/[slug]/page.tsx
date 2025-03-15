@@ -6,6 +6,7 @@ import type { Listing } from '@/types/listing';
 import Image from 'next/image';
 import { Button } from '@/components/Button/Button';
 import Link from 'next/link';
+import { TextToSpeech } from '@/components/TextToSpeech/TextToSpeech';
 
 export default function ListingDetailsPage({
   params,
@@ -78,6 +79,10 @@ export default function ListingDetailsPage({
                 </div>
                 <span className="text-sm text-gray-500">{listing.location}</span>
               </div>
+            </div>
+
+            <div className="flex items-center space-x-4 mb-6">
+              <TextToSpeech text={`${listing.title}. ${listing.description}`} />
             </div>
 
             {/* Description */}
