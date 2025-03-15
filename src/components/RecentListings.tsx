@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Button } from '@/components/Button/Button';
-import { Card } from '@/components/Card/Card';
+import { Button } from './Button/Button';
+import { Card } from './Card/Card';
 import { getRecentListings } from '@/utils/listings';
 
 export function RecentListings() {
@@ -16,7 +16,12 @@ export function RecentListings() {
           {recentListings.map((listing) => (
             <Card
               key={listing.id}
-              {...listing}
+              title={listing.title}
+              description={listing.description}
+              listingDuration={listing.listingDuration}
+              location={listing.location}
+              imageUrl={listing.imageUrl}
+              foodExpiry={listing.foodExpiry}
             >
               <Link href={`/listings/${listing.slug}`}>
                 <Button size="sm" variant="primary" className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">

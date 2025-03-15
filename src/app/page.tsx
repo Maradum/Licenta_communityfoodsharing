@@ -1,7 +1,7 @@
-import { HeroSection } from '@/components/HeroSection/HeroSection';
-import { RecentListings } from '@/components/RecentListings/RecentListings';
-import { SocialImpact } from '@/components/SocialImpact/SocialImpact';
-import { BestPractices } from '@/components/BestPractices/BestPractices';
+import { HeroSection } from '@/components/HeroSection';
+import { RecentListings } from '@/components/RecentListings';
+import { SocialImpact } from '@/components/SocialImpact';
+import { BestPractices } from '@/components/BestPractices';
 import { HowItWorks } from '@/components/HowItWorks/HowItWorks';
 
 export default function Home() {

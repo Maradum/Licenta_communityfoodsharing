@@ -2,66 +2,78 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaXTwitter } from 'react-icons/fa6';
+import { Button } from '../Button/Button';
 
 export const Header = () => {
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
+          {/* Logo and Website Name */}
+          <Link href="/" className="flex items-center space-x-3">
             <Image
               src="/images/logo.jpg"
               alt="Community Food Sharing"
-              width={150}
-              height={40}
-              className="h-10 w-auto"
+              width={50}
+              height={50}
+              className="h-12 w-12 rounded-full"
             />
+            <span className="text-xl font-semibold text-gray-900">Community Food Share</span>
           </Link>
 
-          {/* Navigation */}
+          {/* Main Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            <Link 
+              href="/add-listing" 
+              className="text-gray-700 hover:text-yellow-500 transition-colors"
+            >
+              Share Food
+            </Link>
+            <Link 
+              href="/search-listings" 
+              className="text-gray-700 hover:text-yellow-500 transition-colors"
+            >
+              Find Food
+            </Link>
+            <Link 
+              href="/about" 
+              className="text-gray-700 hover:text-yellow-500 transition-colors"
+            >
+              About Us
+            </Link>
             <Link 
               href="/locations" 
               className="text-gray-700 hover:text-yellow-500 transition-colors"
             >
               Locations
             </Link>
-            <Link 
-              href="/chatbot" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
-              ChatGPT
-            </Link>
-            <Link 
-              href="/dial-in" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
-              Dial-in
-            </Link>
-            <Link 
-              href="/login" 
-              className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
-            >
-              Login
-            </Link>
           </nav>
 
-          {/* Social Media Icons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
-              <FaFacebook className="w-5 h-5" />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
-              <FaInstagram className="w-5 h-5" />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
-              <FaTwitter className="w-5 h-5" />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
-              <FaLinkedin className="w-5 h-5" />
-            </a>
+          {/* Right Side: Social Icons and Auth */}
+          <div className="hidden md:flex items-center space-x-6">
+            {/* Social Icons */}
+            <div className="flex items-center space-x-4">
+              <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
+                <FaFacebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
+                <FaInstagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
+                <FaXTwitter className="w-5 h-5" />
+              </a>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="flex items-center space-x-3">
+              <Link href="/login">
+                <Button variant="primary" size="sm">Sign In</Button>
+              </Link>
+              <Link href="/signup">
+                <Button variant="outline" size="sm">Sign Up</Button>
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}

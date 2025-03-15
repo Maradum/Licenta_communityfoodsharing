@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from 'next/link';
-import { Button } from '@/components/Button/Button';
+import { Button } from './Button/Button';
 
 export function HeroSection() {
   return (
