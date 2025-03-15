@@ -8,22 +8,27 @@ interface AuthRequest extends Request {
 
 export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // Get token from header
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
-      throw new Error();
+      return res.status(401).json({ message: 'No authentication token, access denied' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    const user = await User.findById(decoded.userId);
-
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    
+    // Get user from database
+    const user = await User.findById((decoded as any).userId).select('-password');
+    
     if (!user) {
-      throw new Error();
+      return res.status(401).json({ message: 'User not found' });
     }
 
+    // Add user to request
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Please authenticate' });
+    res.status(401).json({ message: 'Token is invalid' });
   }
 }; 

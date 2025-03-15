@@ -1,18 +1,12 @@
 import { NextResponse } from 'next/server';
-
-// Mock database for demonstration
-let MOCK_USERS = [
-  {
-    id: '1',
-    email: 'donor@example.com',
-    password: 'password123',
-    name: 'John Donor',
-    role: 'donor',
-  },
-];
+import { connectDB } from '@/server/config/db';
+import { User } from '@/server/models/User';
+import jwt from 'jsonwebtoken';
 
 export async function POST(request: Request) {
   try {
+    await connectDB();
+    
     const body = await request.json();
     const { name, email, password, role } = body;
 
@@ -25,38 +19,55 @@ export async function POST(request: Request) {
     }
 
     // Check if email already exists
-    if (MOCK_USERS.some((user) => user.email === email)) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return NextResponse.json(
         { error: 'Email already exists' },
         { status: 400 }
       );
     }
 
-    // Create new user (in a real app, this would be saved to a database)
-    const newUser = {
-      id: String(MOCK_USERS.length + 1),
+    // Create new user
+    const user = new User({
       email,
-      password, // In a real app, this would be hashed
+      password, // Will be hashed by the pre-save middleware
       name,
       role,
-    };
-
-    MOCK_USERS.push(newUser);
-
-    // In a real app, you would:
-    // 1. Hash the password before storing
-    // 2. Generate a verification email
-    // 3. Implement proper error handling
-    // 4. Add additional security measures
-
-    return NextResponse.json({
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-      },
     });
+
+    await user.save();
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user._id,
+        name: user.name,
+        role: user.role
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: '24h' }
+    );
+
+    // Set HTTP-Only cookie with the token
+    const response = NextResponse.json({
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      }
+    });
+
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 // 24 hours
+    });
+
+    return response;
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(

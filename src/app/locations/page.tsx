@@ -7,7 +7,7 @@ import { Button } from '@/components/Button/Button';
 const CITIES = [
   {
     name: 'London',
-    image: '/images/london.jpg',
+    image: '/images/London.jpeg',
     activeListings: 150,
     activeDonors: 45,
     description: 'The capital leads in food sharing initiatives.',
@@ -21,14 +21,14 @@ const CITIES = [
   },
   {
     name: 'Birmingham',
-    image: '/images/birmingham.jpg',
+    image: '/images/Birmingham.jpg',
     activeListings: 95,
     activeDonors: 32,
     description: 'Strong network of local food donors.',
   },
   {
     name: 'Glasgow',
-    image: '/images/glasgow.jpg',
+    image: '/images/Glasgow.jpg',
     activeListings: 65,
     activeDonors: 22,
     description: 'Active participation in reducing food waste.',
@@ -42,7 +42,7 @@ const CITIES = [
   },
   {
     name: 'Liverpool',
-    image: '/images/liverpool.jpg',
+    image: '/images/liverpool.jpeg',
     activeListings: 45,
     activeDonors: 15,
     description: 'Growing impact on food waste reduction.',

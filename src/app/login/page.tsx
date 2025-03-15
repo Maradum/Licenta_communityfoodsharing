@@ -44,8 +44,14 @@ export default function LoginPage() {
         throw new Error('Login failed');
       }
 
-      // Handle successful login
-      window.location.href = '/';
+      const data = await response.json();
+
+      // Redirect based on user role
+      if (data.user.role === 'admin') {
+        window.location.href = '/admin/dashboard';
+      } else {
+        window.location.href = '/dashboard';
+      }
     } catch (error) {
       setErrors(prev => ({
         ...prev,

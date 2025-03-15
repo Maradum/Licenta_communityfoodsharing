@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { connectDB } from '@/server/config/db';
+import { User } from '@/server/models/User';
+import jwt from 'jsonwebtoken';
 
 // Mock user data for demonstration
 const MOCK_USERS = [
@@ -20,6 +23,8 @@ const MOCK_USERS = [
 
 export async function POST(request: Request) {
   try {
+    await connectDB();
+    
     const body = await request.json();
     const { email, password } = body;
 
@@ -31,32 +36,59 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find user (in a real app, this would query a database)
-    const user = MOCK_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
-
+    // Find user
+    const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // In a real app, you would:
-    // 1. Generate a JWT token
-    // 2. Set secure HTTP-only cookies
-    // 3. Handle password hashing
-    // 4. Implement proper session management
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
 
-    return NextResponse.json({
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user._id,
+        name: user.name,
+        role: user.role
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: '24h' }
+    );
+
+    // Set HTTP-Only cookie with the token
+    const response = NextResponse.json({
       user: {
-        id: user.id,
+        id: user._id,
         email: user.email,
         name: user.name,
         role: user.role,
-      },
+      }
     });
+
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 // 24 hours
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
