@@ -25,6 +25,12 @@ export const Header = () => {
           {/* Main Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
+              href="/about" 
+              className="text-gray-700 hover:text-yellow-500 transition-colors"
+            >
+              About Us
+            </Link>
+            <Link 
               href="/add-listing" 
               className="text-gray-700 hover:text-yellow-500 transition-colors"
             >
@@ -35,12 +41,6 @@ export const Header = () => {
               className="text-gray-700 hover:text-yellow-500 transition-colors"
             >
               Find Food
-            </Link>
-            <Link 
-              href="/about" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
-              About Us
             </Link>
             <Link 
               href="/locations" 

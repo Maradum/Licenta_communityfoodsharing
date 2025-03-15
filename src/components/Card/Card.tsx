@@ -48,17 +48,19 @@ export function Card({
       'shadow-lg hover:shadow-xl transition-all duration-200',
       'flex flex-col h-full'
     )}>
-      <div className="relative h-48 w-full flex-shrink-0">
+      <Link href={`/listing/${slug}`} className="relative h-48 w-full flex-shrink-0 group">
         <Image
           src={imageUrl}
           alt={title}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-200 group-hover:scale-105"
         />
-      </div>
+      </Link>
       <div className="p-6 border-t-2 border-yellow-400 flex-grow flex flex-col">
         <div className="flex-grow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-yellow-600">{title}</h3>
+          <Link href={`/listing/${slug}`}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-yellow-600 transition-colors">{title}</h3>
+          </Link>
           <p className="text-gray-600 mb-4 line-clamp-2">{description}</p>
           
           <div className="flex items-center justify-between mb-4 bg-yellow-50 p-2 rounded-lg">

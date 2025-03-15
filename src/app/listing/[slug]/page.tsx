@@ -14,6 +14,7 @@ export default function ListingDetailsPage({
 }) {
   const [listing, setListing] = useState<Listing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPhone, setShowPhone] = useState(false);
 
   useEffect(() => {
     const fetchListing = () => {
@@ -67,7 +68,7 @@ export default function ListingDetailsPage({
             <div className="flex items-start justify-between mb-6">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{listing.title}</h1>
-                <p className="text-gray-600">Posted by {listing.postedBy}</p>
+                <p className="text-gray-600">Posted by {listing.userName}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
                 <div className="bg-yellow-50 px-4 py-2 rounded-lg">
@@ -119,15 +120,18 @@ export default function ListingDetailsPage({
               </div>
 
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Collection Details</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact {listing.userName}</h3>
                 <div className="space-y-4">
                   <p className="text-gray-600">
-                    This food item is available for collection in {listing.location}. Please contact the provider
+                    This food item is available for collection in {listing.location}. Please contact {listing.userName}
                     to arrange collection and help reduce food waste in your community.
                   </p>
                   <div className="flex flex-col gap-3">
-                    <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 border-2 border-transparent">
-                      Contact Provider
+                    <Button 
+                      onClick={() => setShowPhone(!showPhone)}
+                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 border-2 border-transparent"
+                    >
+                      {showPhone ? listing.phoneNumber : 'Show Phone Number'}
                     </Button>
                     <Button variant="outline" className="w-full border-2 border-gray-200 hover:border-yellow-400">
                       Save for Later

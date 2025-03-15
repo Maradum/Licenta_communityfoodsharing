@@ -17,6 +17,8 @@ export interface Listing {
   listingDuration: ListingDuration;
   location: string;
   postedBy: string;
+  userName: string;
+  phoneNumber: string;
   imageUrl: string;
   category: FoodCategory;
   foodType: FoodType;
