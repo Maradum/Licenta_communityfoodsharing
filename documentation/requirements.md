@@ -1,167 +1,157 @@
-```
 # Community Food Sharing – Project Requirements
 
 ## 📌 Project Overview
-Community Food Sharing is a digital platform connecting individuals with surplus food (Donors) to those in need (Beneficiaries). Its primary goal is to reduce food waste and efficiently distribute surplus food within communities across the United Kingdom. The platform is initially developed in English, with planned multilingual support via ChatGPT integration.
+Community Food Sharing is a web platform connecting people with excess food to those in need across the United Kingdom. It serves as a free food-sharing exchange, enabling users to donate and receive food items based on location and availability.
 
 ---
 
 ## 🎯 Main Objectives
 
-- Reduce food waste through effective digital connections between donors and beneficiaries.
-- Enhance easy community access to available surplus food.
-- Provide comprehensive accessibility including Text-to-Speech and Dial-in capabilities.
-- Integrate AI chatbot (ChatGPT) for seamless user interaction and support.
+- Create an accessible platform for food sharing
+- Connect donors with receivers efficiently
+- Reduce food waste through community engagement
+- Ensure accessibility for all user groups
+- Provide a simple, intuitive user experience
 
 ---
 
-## ⚙️ Technology Stack
+## 👥 User Roles
 
-**Frontend:**
+### Donors
+- Can post food listings
+- Set expiry durations (1 day, 3 days, 1 week)
+- Manage their donations
+- Receive requests
+
+### Receivers
+- Browse available food donations
+- Filter by location and food type
+- Request available items
+- View donation details
+
+---
+
+## 🌟 Key Features
+
+### Core Features (Phase 1 - Current Contract)
+- User authentication (login/signup)
+- Food listing management
+- Location-based filtering
+- Basic chatbot interface
+- Responsive design
+- Social media sharing
+
+### Accessibility Features (Phase 1)
+- High contrast design
+- Readable fonts
+- Mobile responsiveness
+- Simple, intuitive interface
+
+### Future Features (Phase 2)
+- Voice commands for navigation
+- Text-to-speech functionality
+- Dial-in integration
+- Advanced chatbot with AI
+
+---
+
+## 💻 Technology Stack
+
+### Frontend (Current Phase)
 - Framework: NextJS (latest stable version)
 - Language: TypeScript
 - Styling: Tailwind CSS
+- Development Environment: Visual Studio Code
 
-**Backend (Initial MVP):**
-- NextJS API Routes (basic authentication: login/signup)
-- Future expansion: Node.js
+### Backend (Current Phase - Basic)
+- NextJS API Routes for:
+  - User authentication
+  - Basic data handling
 
-**Database (Planned):**
-- MongoDB
-
-**Deployment:**
-- Vercel (recommended)
-
----
-
-## 🛠️ Functional Requirements
-
-### 1. User Roles
-- **Donors:** Can list available surplus food.
-- **Beneficiaries:** Can search for and request listed food items.
-
-### 2. Food Listings
-- Users can post offers or requests for food with limited validity periods (1 day, 3 days, 1 week).
-- Listings clearly display expiry dates and relevant details (description, location, contact information).
-
-### 3. Location-Based Filtering
-- Users can filter food listings by major cities: London, Manchester, Birmingham, Glasgow, Leeds, Liverpool, etc.
-
-### 4. User Authentication
-- Simple login and signup system using NextJS API Routes.
-- Preparation for future secure MongoDB integration.
-
-### 5. AI Chatbot Integration
-- Frontend-ready chatbot interface.
-- ChatGPT backend integration planned to assist users, multilingual support.
-
-### 6. Accessibility Features
-- HTML semantic structure prepared for Text-to-Speech (future integration).
-- Dial-in option for less tech-savvy users (future implementation).
+### Backend (Future Phase)
+- Full backend implementation (Node.js/Firebase)
+- Database integration
+- Advanced features
 
 ---
 
-## 📁 Project Structure
+## 📱 Required Pages
 
-```
-CommunityFoodSharing/
-├── app/
-│   ├── page.tsx (Homepage)
-│   ├── add-listing
-│   ├── search-listings
-│   ├── locations
-│   ├── login
-│   └── signup
-├── components/
-│   ├── Header
-│   ├── Footer
-│   ├── Button
-│   ├── Card
-│   ├── Form
-│   ├── Modal
-│   └── Chatbot
-├── public/
-│   ├── images/
-│   │   ├── hero-image.png
-│   │   └── logo.jpg
-│   └── icons/
-└── styles/
-    └── globals.css
-```
+### Essential Pages (Phase 1)
+- Homepage with animated banner
+- Login/Signup pages
+- Add listing page
+- Search/Browse listings page
+- Location-based pages
+- Individual listing view page
+- User profile page
+- About/How it works page
+
+### Components
+- Header with navigation
+- Footer with links
+- Reusable Button component
+- Form components
+- Card components for listings
+- Modal component
+- Chatbot component
 
 ---
 
-## 🗃️ Mock Data
+## 🎨 Design Requirements
 
-### Example Food Listings
-```json
-[
-  {
-    "id": "1",
-    "title": "Fresh Vegetables",
-    "description": "Carrots, broccoli, spinach from local farm.",
-    "expiry": "1 day",
-    "location": "London",
-    "postedBy": "Donor User 1"
-  },
-  {
-    "id": "2",
-    "title": "Baked Goods",
-    "description": "Bread, pastries from local bakery.",
-    "expiry": "3 days",
-    "location": "Manchester",
-    "postedBy": "Donor User 2"
-  }
-]
-```
+### Visual Elements
+- Minimalist & user-friendly UI
+- High contrast for accessibility
+- Readable typography
+- Animated hero section
+- Consistent color scheme
+- Mobile-first approach
+
+### User Experience
+- Intuitive navigation
+- Clear call-to-actions
+- Simple forms
+- Responsive feedback
+- Loading states
+- Error handling
 
 ---
 
-## 🔑 Backend API (Initial MVP)
-- Simple mock API routes for user authentication:
-  - `/api/login`
-  - `/api/signup`
-- Preparation for MongoDB integration.
+## 📋 Content Requirements
+
+### Listing Information
+- Title
+- Description
+- Location
+- Expiry time
+- Images
+- Contact details
+- Food type (perishable/non-perishable)
+
+### User Information
+- Name
+- Email
+- Location
+- Role (donor/receiver)
+- Contact preferences
 
 ---
 
-## 💬 ChatGPT Integration (Planned)
-- Frontend modal/chatbox to interact with users.
-- Backend prepared to connect to ChatGPT (OpenAI API).
+## 🔄 Development Phases
+
+### Phase 1 (Current Contract)
+- Complete frontend implementation
+- Basic backend for authentication
+- Essential pages and features
+- Core user flows
+
+### Phase 2 (Future Contract)
+- Full backend implementation
+- Advanced features
+- Accessibility enhancements
+- Additional integrations
 
 ---
 
-## ♿ Accessibility Strategy
-- HTML and ARIA attributes optimized for screen readers.
-- Placeholder for future Dial-in and Text-to-Speech integrations.
-
----
-
-## 🎨 UI/UX Design
-- Reference: "Hero image.png"
-- Color Scheme: Yellow, White, Black
-- Font: Modern, clear readability
-- Interactive and intuitive design elements.
-
----
-
-## 🚀 Future Roadmap
-
-- Comprehensive backend (Node.js, MongoDB integration).
-- Full integration of ChatGPT (OpenAI API).
-- User dashboards for managing listings and profiles.
-- Real-time notifications and updates (via WebSockets).
-- Enhanced accessibility (full Text-to-Speech, voice navigation, Dial-in support).
-
----
-
-## 📚 Additional Resources
-
-- [NextJS Documentation](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [OpenAI API](https://platform.openai.com/docs/api-reference)
-
----
-
-This document details the complete frontend structure and requirements for the Community Food Sharing project, preparing thoroughly for future integrations and expansions.
-```
+*Note: This document focuses on Phase 1 requirements (current contract). Phase 2 features are listed for reference and future planning.*

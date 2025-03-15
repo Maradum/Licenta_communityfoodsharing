@@ -2,29 +2,12 @@ import Image from "next/image";
 import Link from 'next/link';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
-
-const mockListings = [
-  {
-    id: '1',
-    title: 'Fresh Vegetables',
-    description: 'Carrots, broccoli, spinach from local farm.',
-    expiry: '1 day',
-    location: 'London',
-    postedBy: 'Donor User 1',
-    imageUrl: '/images/vegetables.jpg'
-  },
-  {
-    id: '2',
-    title: 'Baked Goods',
-    description: 'Bread, pastries from local bakery.',
-    expiry: '3 days',
-    location: 'Manchester',
-    postedBy: 'Donor User 2',
-    imageUrl: '/images/bakery.jpg'
-  }
-] as const;
+import { HowItWorks } from '@/components/HowItWorks/HowItWorks';
+import { getRecentListings } from '@/utils/listings';
 
 export default function Home() {
+  const recentListings = getRecentListings(6);
+
   return (
     <main className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -40,12 +23,12 @@ export default function Home() {
               </p>
               <div className="space-x-4">
                 <Link href="/add-listing">
-                  <Button size="lg">
+                  <Button size="lg" className="bg-gray-900 text-white hover:bg-gray-800">
                     Share Food
                   </Button>
                 </Link>
                 <Link href="/search-listings">
-                  <Button variant="outline" size="lg">
+                  <Button variant="outline" size="lg" className="border-gray-900 text-gray-900 hover:bg-white/20">
                     Find Food
                   </Button>
                 </Link>
@@ -71,20 +54,22 @@ export default function Home() {
             Recent Food Listings
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockListings.map((listing) => (
+            {recentListings.map((listing) => (
               <Card
                 key={listing.id}
                 {...listing}
               >
-                <Button size="sm" variant="secondary">
-                  View Details
-                </Button>
+                <Link href={`/listings/${listing.slug}`}>
+                  <Button size="sm" variant="primary" className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">
+                    View Details
+                  </Button>
+                </Link>
               </Card>
             ))}
           </div>
           <div className="mt-12 text-center">
             <Link href="/search-listings">
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" className="border-yellow-400 text-gray-900 hover:bg-yellow-50">
                 View All Listings
               </Button>
             </Link>
@@ -92,43 +77,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            How It Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">1</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">List Your Food</h3>
-              <p className="text-gray-600">
-                Share your surplus food with the community.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">2</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Connect</h3>
-              <p className="text-gray-600">
-                Match with people who need your food.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">3</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Share</h3>
-              <p className="text-gray-600">
-                Arrange pickup and share the food.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* How It Works Section */}
+      <HowItWorks />
     </main>
   );
 }
