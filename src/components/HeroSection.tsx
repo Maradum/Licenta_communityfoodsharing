@@ -27,12 +27,12 @@ export function HeroSection() {
               </Link>
             </div>
           </div>
-          <div className="relative h-[400px] rounded-lg overflow-hidden shadow-xl">
+          <div className="relative h-[500px] flex items-center justify-center">
             <Image
-              src="/images/hero-image.png"
+              src="/images/food-love.png"
               alt="Community Food Sharing"
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>

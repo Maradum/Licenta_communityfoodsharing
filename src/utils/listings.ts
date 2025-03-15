@@ -1,13 +1,20 @@
-import { Listing, ExpiryTime, FoodType } from '@/types/listing';
+import { Listing, ListingDuration, FoodType, FoodCategory } from '@/types/listing';
 import listingsData from '@/data/listings.json';
 
 // Type assertion to ensure the JSON data matches our Listing type
-const typedListings = listingsData.listings.map(listing => ({
-  ...listing,
-  expiry: listing.expiry as ExpiryTime,
-  category: listing.category as Listing['category'],
-  foodType: listing.foodType as FoodType
-}));
+const typedListings = listingsData.listings.map(listing => {
+  const { foodExpiry, ...rest } = listing;
+  return {
+    ...rest,
+    listingDuration: listing.listingDuration as ListingDuration,
+    category: listing.category as FoodCategory,
+    foodType: listing.foodType as FoodType,
+    foodExpiry: foodExpiry ? {
+      ...foodExpiry,
+      type: foodExpiry.type as FoodType
+    } : undefined
+  } as Listing;
+});
 
 export const getAllListings = (): Listing[] => {
   return typedListings;
@@ -15,7 +22,7 @@ export const getAllListings = (): Listing[] => {
 
 export const getRecentListings = (limit: number = 6): Listing[] => {
   return typedListings
-    .filter(listing => listing.isAvailable)
+    .filter(listing => listing.available)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit);
 };
@@ -30,16 +37,16 @@ export const getListingsByLocation = (location: string): Listing[] => {
   );
 };
 
-export const getListingsByCategory = (category: Listing['category']): Listing[] => {
+export const getListingsByCategory = (category: FoodCategory): Listing[] => {
   return typedListings.filter(listing => listing.category === category);
 };
 
 export const searchListings = (params: {
   search?: string;
   location?: string;
-  category?: Listing['category'];
+  category?: FoodCategory;
   foodType?: FoodType;
-  expiry?: ExpiryTime;
+  listingDuration?: ListingDuration;
 }): Listing[] => {
   return typedListings.filter(listing => {
     const matchesSearch = !params.search || 
@@ -55,9 +62,9 @@ export const searchListings = (params: {
     const matchesFoodType = !params.foodType ||
       listing.foodType === params.foodType;
 
-    const matchesExpiry = !params.expiry ||
-      listing.expiry === params.expiry;
+    const matchesListingDuration = !params.listingDuration ||
+      listing.listingDuration === params.listingDuration;
 
-    return matchesSearch && matchesLocation && matchesCategory && matchesFoodType && matchesExpiry;
+    return matchesSearch && matchesLocation && matchesCategory && matchesFoodType && matchesListingDuration;
   });
 }; 
