@@ -13,6 +13,11 @@ This document tracks suggested enhancements and their implementation status for 
 - [ ] User preferences and dietary restrictions
 - [ ] Voice command profile management
 - [ ] Accessibility preferences storage
+- [ ] Food handling certification badges
+- [ ] Volunteer status verification
+- [ ] Food bank partnership verification
+- [ ] Community leader roles
+- [ ] Regular donor recognition program
 
 ### 2. Listing Management
 - [ ] Real-time listing status updates
@@ -25,6 +30,11 @@ This document tracks suggested enhancements and their implementation status for 
 - [ ] Pickup time slots scheduling
 - [ ] Voice-commanded listing creation
 - [ ] Food type categorization (perishable/non-perishable)
+- [ ] Bulk food donation management
+- [ ] Food storage condition indicators
+- [ ] Dietary restrictions tags (vegan, halal, kosher, etc.)
+- [ ] Food temperature logging for transport
+- [ ] Portion size estimation tools
 
 ### 3. Communication System
 - [ ] In-app messaging between users
@@ -36,6 +46,11 @@ This document tracks suggested enhancements and their implementation status for 
 - [ ] Voice message support
 - [ ] Text-to-speech message reading
 - [ ] Dial-in communication system
+- [ ] Emergency food alerts for local communities
+- [ ] Food bank capacity updates
+- [ ] Community event coordination messages
+- [ ] Automated matching notifications
+- [ ] Collection point status updates
 
 ### 4. Location Services
 - [ ] Map integration for food pickup points
@@ -46,6 +61,11 @@ This document tracks suggested enhancements and their implementation status for 
 - [ ] Public transport information
 - [ ] Voice-commanded location search
 - [ ] Accessibility-friendly location selection
+- [ ] Food storage facility mapping
+- [ ] Temperature-controlled transport routes
+- [ ] Emergency food distribution points
+- [ ] Community kitchen locations
+- [ ] Food bank operating hours integration
 
 ### 5. Backend Requirements
 - [ ] User authentication with JWT
@@ -74,6 +94,14 @@ This document tracks suggested enhancements and their implementation status for 
 - [ ] High contrast theme options
 - [ ] Font size adjustments
 - [ ] Keyboard navigation improvements
+- [ ] Food safety certification courses
+- [ ] Recipe suggestions for bulk ingredients
+- [ ] Food preservation guides
+- [ ] Seasonal food donation calendar
+- [ ] Community meal planning tools
+- [ ] Food waste tracking metrics
+- [ ] Carbon footprint calculator for food saved
+- [ ] Community achievement badges
 
 ### 7. Visual Enhancements
 - [ ] Animated hero section

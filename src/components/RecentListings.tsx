@@ -22,13 +22,8 @@ export function RecentListings() {
               location={listing.location}
               imageUrl={listing.imageUrl}
               foodExpiry={listing.foodExpiry}
-            >
-              <Link href={`/listings/${listing.slug}`}>
-                <Button size="sm" variant="primary" className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                  View Details
-                </Button>
-              </Link>
-            </Card>
+              slug={listing.slug}
+            />
           ))}
         </div>
         <div className="mt-12 text-center">

@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/Card/Card';
 import { Button } from '@/components/Button/Button';
 import { searchListings, getAllListings } from '@/utils/listings';
-import type { Listing, ExpiryTime, FoodType } from '@/types/listing';
-import Link from 'next/link';
+import type { Listing, FoodType } from '@/types/listing';
 
 export default function SearchListings() {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -13,7 +12,7 @@ export default function SearchListings() {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Listing['category'] | ''>('');
   const [selectedFoodType, setSelectedFoodType] = useState<FoodType | ''>('');
-  const [selectedExpiry, setSelectedExpiry] = useState<ExpiryTime | ''>('');
+  const [selectedDuration, setSelectedDuration] = useState<Listing['listingDuration'] | ''>('');
 
   useEffect(() => {
     // Initial load of all listings
@@ -27,17 +26,17 @@ export default function SearchListings() {
       location: selectedLocation,
       category: selectedCategory || undefined,
       foodType: selectedFoodType || undefined,
-      expiry: selectedExpiry || undefined,
+      listingDuration: selectedDuration || undefined,
     });
     setListings(filteredListings);
-  }, [searchTerm, selectedLocation, selectedCategory, selectedFoodType, selectedExpiry]);
+  }, [searchTerm, selectedLocation, selectedCategory, selectedFoodType, selectedDuration]);
 
   // Get unique locations from all listings
   const locations = [...new Set(getAllListings().map(listing => listing.location))];
 
   const categories: Listing['category'][] = ['vegetables', 'fruits', 'bakery', 'dairy', 'canned', 'other'];
   const foodTypes: FoodType[] = ['perishable', 'non-perishable'];
-  const expiryTimes: ExpiryTime[] = ['1 day', '3 days', '1 week'];
+  const durations: Listing['listingDuration'][] = ['1 day', '3 days', '1 week'];
 
   return (
     <main className="min-h-screen py-12">
@@ -65,7 +64,7 @@ export default function SearchListings() {
               >
                 <option value="">All Locations</option>
                 {locations.map(location => (
-                  <option key={location} value={location.toLowerCase()}>
+                  <option key={location} value={location}>
                     {location}
                   </option>
                 ))}
@@ -73,7 +72,7 @@ export default function SearchListings() {
             </div>
           </div>
 
-          {/* Food Type and Expiry Filters */}
+          {/* Food Type and Duration Filters */}
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -102,24 +101,24 @@ export default function SearchListings() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Expiry Time
+                Duration
               </label>
               <div className="flex gap-2">
-                {expiryTimes.map(time => (
+                {durations.map(duration => (
                   <Button
-                    key={time}
-                    variant={selectedExpiry === time ? 'primary' : 'outline'}
+                    key={duration}
+                    variant={selectedDuration === duration ? 'primary' : 'outline'}
                     size="sm"
                     className={
-                      selectedExpiry === time
+                      selectedDuration === duration
                         ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
                         : 'border-gray-300 hover:border-yellow-400'
                     }
-                    onClick={() => setSelectedExpiry(
-                      selectedExpiry === time ? '' : time
+                    onClick={() => setSelectedDuration(
+                      selectedDuration === duration ? '' : duration
                     )}
                   >
-                    {time}
+                    {duration}
                   </Button>
                 ))}
               </div>
@@ -165,14 +164,14 @@ export default function SearchListings() {
           {listings.map((listing) => (
             <Card
               key={listing.id}
-              {...listing}
-            >
-              <Link href={`/listings/${listing.slug}`}>
-                <Button size="sm" variant="primary" className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                  View Details
-                </Button>
-              </Link>
-            </Card>
+              title={listing.title}
+              description={listing.description}
+              listingDuration={listing.listingDuration}
+              location={listing.location}
+              imageUrl={listing.imageUrl}
+              foodExpiry={listing.foodExpiry}
+              slug={listing.slug}
+            />
           ))}
         </div>
 

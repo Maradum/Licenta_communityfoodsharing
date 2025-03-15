@@ -465,6 +465,25 @@
       "slug": "herbs-bundle-exeter",
       "createdAt": "2024-03-15T11:15:00Z",
       "available": true
+    },
+    {
+      "id": "26",
+      "title": "Fresh Herbs Bundle",
+      "description": "Mixed fresh herbs including basil, parsley, and mint.Mixed fresh herbs including basil, parsley, and mint.Mixed fresh herbs including basil, parsley, and mint.Mixed fresh herbs including basil, parsley, and mint.Mixed fresh herbs including basil, parsley, and mint.",
+      "listingDuration": "3 days",
+      "location": "Exeter",
+      "postedBy": "HerbGarden",
+      "imageUrl": "/images/fresh-herbs.jpg",
+      "category": "vegetables",
+      "foodType": "perishable",
+      "foodExpiry": {
+        "type": "perishable",
+        "expiryDate": "2024-03-19",
+        "expiryNote": "Best if consumed within a week"
+      },
+      "slug": "herbs-bundle-exeter",
+      "createdAt": "2024-03-15T11:15:00Z",
+      "available": true
     }
   ]
 } 
