@@ -8,7 +8,7 @@ export default function AboutPage() {
       <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
         <div>
           <Image
-            src="/images/about-hero.jpg"
+            src="/images/food-love.png"
             alt="Community Food Sharing"
             width={500}
             height={300}
