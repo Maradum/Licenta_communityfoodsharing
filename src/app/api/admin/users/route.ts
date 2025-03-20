@@ -1,7 +1,20 @@
 import { NextResponse } from 'next/server';
-import { connectDB } from '@/server/config/db';
-import { User } from '@/server/models/User';
 import { jwtVerify } from 'jose';
+import { Sequelize, QueryTypes } from 'sequelize';
+import { AppError } from '@/types/error';
+
+// Configurarea directă a Sequelize aici pentru a evita probleme de import
+const dbUrl = process.env.DATABASE_URL || 'mysql://root:DwpCyZFKlzRbbxVDBMUWFWzQpKzJhacS@mainline.proxy.rlwy.net:47569/railway';
+const sequelize = new Sequelize(dbUrl, {
+  dialect: 'mysql',
+  dialectModule: require('mysql2'), // Specificăm direct modulul
+  logging: false,
+  dialectOptions: {
+    ssl: {
+      rejectUnauthorized: false
+    }
+  }
+});
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +31,7 @@ export async function GET(request: Request) {
     try {
       const verified = await jwtVerify(
         token,
-        new TextEncoder().encode(process.env.JWT_SECRET)
+        new TextEncoder().encode(process.env.JWT_SECRET || 'default_secret_key_for_development')
       );
       
       const payload = verified.payload as { role?: string };
@@ -35,37 +48,57 @@ export async function GET(request: Request) {
       );
     }
 
-    await connectDB();
+    try {
+      // Testăm conexiunea la bază
+      await sequelize.authenticate();
+      console.log('Database connection successful');
+    } catch (error) {
+      console.error('Database connection error:', error);
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
     
     // Get query parameters for filtering
     const url = new URL(request.url);
-    const role = url.searchParams.get('role');
-    const status = url.searchParams.get('status');
-    const search = url.searchParams.get('search');
-
-    // Build query
-    let query: any = {};
-    if (role) query.role = role;
-    if (status) query.status = status;
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    // Fetch users with pagination
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
+    
+    // Query to get users
+    const query = `
+      SELECT id, name, email, role, status, createdAt, updatedAt, lastLogin
+      FROM Users
+      ORDER BY createdAt DESC
+      LIMIT ? OFFSET ?
+    `;
+    
+    // Query to get total count
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM Users
+    `;
+    
+    // Execute queries
+    let users = await sequelize.query(query, {
+      replacements: [limit, offset],
+      type: QueryTypes.SELECT
+    });
+    
+    const countResult = await sequelize.query(countQuery, {
+      type: QueryTypes.SELECT
+    });
+    
+    const total = (countResult[0] as any).total;
 
-    const users = await User.find(query)
-      .select('-password') // Exclude password
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await User.countDocuments(query);
+    // Transform user data to match expected format in frontend
+    users = users.map((user: any) => ({
+      _id: user.id, // Add _id field expected by frontend
+      ...user,
+      createdAt: user.createdAt || new Date().toISOString(),
+      lastLogin: user.lastLogin || null
+    }));
 
     return NextResponse.json({
       users,
@@ -76,11 +109,12 @@ export async function GET(request: Request) {
         limit
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching users:', error);
+    const status = error instanceof AppError ? error.status : 500;
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status }
     );
   }
 } 

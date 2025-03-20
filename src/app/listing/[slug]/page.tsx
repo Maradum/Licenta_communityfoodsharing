@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getListingBySlug } from '@/utils/listings';
 import type { Listing } from '@/types/listing';
 import Image from 'next/image';
 import { Button } from '@/components/Button/Button';
@@ -18,10 +17,20 @@ export default function ListingDetailsPage({
   const [showPhone, setShowPhone] = useState(false);
 
   useEffect(() => {
-    const fetchListing = () => {
-      const foundListing = getListingBySlug(params.slug);
-      setListing(foundListing || null);
-      setIsLoading(false);
+    const fetchListing = async () => {
+      try {
+        const response = await fetch(`/api/listings/${params.slug}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch listing');
+        }
+        const data = await response.json();
+        setListing(data.listing || null);
+      } catch (error) {
+        console.error('Error fetching listing:', error);
+        setListing(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchListing();

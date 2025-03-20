@@ -1,34 +1,49 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 
-interface AuthRequest extends Request {
-  user?: any;
+interface DecodedToken {
+  userId: string;
+  name: string;
+  role: string;
 }
 
-export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const auth = async (request: NextRequest) => {
   try {
-    // Get token from header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // Get token from cookies or authorization header
+    const token = request.cookies.get('token')?.value || 
+                 request.headers.get('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
-      return res.status(401).json({ message: 'No authentication token, access denied' });
+      return NextResponse.json(
+        { message: 'No authentication token, access denied' },
+        { status: 401 }
+      );
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
     
     // Get user from database
-    const user = await User.findById((decoded as any).userId).select('-password');
+    const user = await User.findOne({
+      where: { id: decoded.userId },
+      attributes: { exclude: ['password'] }
+    });
     
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return NextResponse.json(
+        { message: 'User not found' },
+        { status: 401 }
+      );
     }
 
-    // Add user to request
-    req.user = user;
-    next();
+    // Return the user
+    return { user };
   } catch (error) {
-    res.status(401).json({ message: 'Token is invalid' });
+    console.error('Authentication error:', error instanceof Error ? error.message : String(error));
+    return NextResponse.json(
+      { message: 'Token is invalid' },
+      { status: 401 }
+    );
   }
 }; 

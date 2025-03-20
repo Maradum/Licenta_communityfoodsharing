@@ -2,14 +2,95 @@
 
 A platform for sharing surplus food within communities to reduce waste and help those in need.
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ (LTS version recommended)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/communityfoodsharing.git
+   cd communityfoodsharing
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file with the required environment variables:
+   ```
+   DATABASE_URL=mysql://root:DwpCyZFKlzRbbxVDBMUWFWzQpKzJhacS@mainline.proxy.rlwy.net:47569/railway
+   JWT_SECRET=foodsharing_jwt_secret_2024
+   ```
+
+4. Run the development server
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Demo Accounts
+
+You can use the following accounts to test the application:
+
+### Admin Account
+- **Email:** admin@foodsharing.com
+- **Password:** admin123
+- **Features:** Access the admin dashboard to manage users
+
+### Regular User Account
+- **Email:** mariana@demo.uk
+- **Password:** password123
+- **Features:** View food listings, profile management
+
+## Demo Walkthrough
+
+### Admin Demo
+1. Log in with the admin account credentials
+2. Navigate to the admin dashboard at `/admin/dashboard`
+3. View all registered users
+4. Manage user accounts (view status, role, etc.)
+
+### User Demo
+1. Log in with the regular user account
+2. View your dashboard with food listings
+3. Explore available food items on the search page
+4. View detailed information about a specific food listing
+
+## Build for Production
+
+To build the application for production:
+
+```bash
+npm run build
+```
+
+To start the production server:
+
+```bash
+npm start
+```
+
 ## Deployment to Vercel
 
 ### Environment Variables
 
-When deploying to Vercel, you only need to set:
+When deploying to Vercel, you need to set:
 
-- `MONGODB_URI`: Your MongoDB connection string
+- `DATABASE_URL`: Your MySQL database connection string (from Railway)
 - `JWT_SECRET`: Secret key for JWT token generation
+
+### Database
+
+This application uses a MySQL database hosted on Railway. The database connection is configured using Sequelize ORM.
+
+Database tables are automatically created on first connection if they don't exist (using `sequelize.sync()`).
 
 ### Build Configuration
 
@@ -33,7 +114,13 @@ Additionally, an `.npmrc` file with `legacy-peer-deps=true` is included to ensur
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Create a `.env` file with the required environment variables
+3. Create a `.env` file with the required environment variables:
+   ```
+   DATABASE_URL=mysql://root:DwpCyZFKlzRbbxVDBMUWFWzQpKzJhacS@mainline.proxy.rlwy.net:47569/railway
+   JWT_SECRET=foodsharing_jwt_secret_2024
+   NODE_ENV=development
+   PORT=5000
+   ```
 4. Run the development server: `npm run dev`
 
 ## Build

@@ -1,32 +1,24 @@
 import { NextResponse } from 'next/server';
-import { connectDB } from '@/server/config/db';
-import { User } from '@/server/models/User';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { User } from '@/server/models/User';
 
-// Mock user data for demonstration
-const MOCK_USERS = [
-  {
-    id: '1',
-    email: 'donor@example.com',
-    password: 'password123',
-    name: 'John Donor',
-    role: 'donor',
-  },
-  {
-    id: '2',
-    email: 'beneficiary@example.com',
-    password: 'password123',
-    name: 'Jane Beneficiary',
-    role: 'beneficiary',
-  },
-];
+// Define user type for the query result
+interface UserRecord {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+  [key: string]: any; // For any other fields
+}
 
 export async function POST(request: Request) {
   try {
-    await connectDB();
-    
     const body = await request.json();
     const { email, password } = body;
+
+    console.log(`Login attempt for email: ${email}`);
 
     // Basic validation
     if (!email || !password) {
@@ -36,17 +28,72 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find user
-    const user = await User.findOne({ email });
+    // Find user using the User model
+    const user = await User.findOne({
+      where: { email }
+    });
+    
     if (!user) {
+      console.log('User not found');
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Check password
-    const isMatch = await user.comparePassword(password);
+    console.log('User found:', user.get('email'));
+    
+    // Get password using getDataValue to avoid Sequelize getter/setter issues
+    const userPassword = user.getDataValue('password');
+    
+    if (!userPassword) {
+      console.error('Password is undefined for user:', email);
+      return NextResponse.json(
+        { error: 'Account authentication issue' },
+        { status: 500 }
+      );
+    }
+    
+    console.log('Password length:', userPassword.length);
+    
+    // For the users already in the database with plaintext passwords
+    // We need to handle both hashed and plaintext passwords
+    let isMatch = false;
+    
+    // Check if the password looks like a bcrypt hash (starts with $2a$ or $2b$)
+    if (userPassword.startsWith('$2a$') || userPassword.startsWith('$2b$')) {
+      // It's a hash, use bcrypt compare
+      try {
+        console.log('Comparing with bcrypt...');
+        isMatch = await bcrypt.compare(password, userPassword);
+      } catch (err) {
+        console.error('Error during bcrypt comparison:', err);
+      }
+    } else {
+      // It's probably plaintext, do direct comparison
+      console.log('Comparing with direct equality...');
+      isMatch = password === userPassword;
+      
+      // If match, we should update to hashed password
+      if (isMatch) {
+        console.log('Converting plaintext password to hash...');
+        try {
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(password, salt);
+          
+          // Update user password to hashed version using setDataValue
+          user.setDataValue('password', hashedPassword);
+          await user.save();
+          console.log('Password converted to hash for future security');
+        } catch (err) {
+          console.error('Error updating to hashed password:', err);
+          // Continue anyway, login should still work
+        }
+      }
+    }
+    
+    console.log('Password match result:', isMatch);
+
     if (!isMatch) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -55,15 +102,15 @@ export async function POST(request: Request) {
     }
 
     // Update last login
-    user.lastLogin = new Date();
+    user.setDataValue('lastLogin', new Date());
     await user.save();
 
     // Generate JWT token
     const token = jwt.sign(
       { 
-        userId: user._id,
-        name: user.name,
-        role: user.role
+        userId: user.getDataValue('id'),
+        name: user.getDataValue('name'),
+        role: user.getDataValue('role')
       },
       process.env.JWT_SECRET!,
       { expiresIn: '24h' }
@@ -72,10 +119,10 @@ export async function POST(request: Request) {
     // Set HTTP-Only cookie with the token
     const response = NextResponse.json({
       user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+        id: user.getDataValue('id'),
+        email: user.getDataValue('email'),
+        name: user.getDataValue('name'),
+        role: user.getDataValue('role'),
       }
     });
 
@@ -88,6 +135,7 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 // 24 hours
     });
 
+    console.log('Login successful');
     return response;
   } catch (error) {
     console.error('Login error:', error);
