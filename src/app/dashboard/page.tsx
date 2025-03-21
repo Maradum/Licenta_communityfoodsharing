@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface User {
+  id?: string;
   name: string;
   email: string;
   role: string;
@@ -28,36 +29,61 @@ export default function UserDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    console.log("UserDashboard component mounted");
+    
     const fetchUserData = async () => {
       try {
+        console.log("Fetching user data from /api/auth/verify");
         const response = await fetch('/api/auth/verify');
+        
         if (!response.ok) {
+          console.error("Auth verification failed with status:", response.status);
           throw new Error('Not authenticated');
         }
+        
         const data = await response.json();
+        console.log("User data received:", data);
         setUser(data.user);
       } catch (err) {
+        console.error("Authentication error:", err);
+        console.log("Redirecting to login page");
         router.push('/login');
+        return false;
       }
+      return true;
     };
 
     const fetchListings = async () => {
       try {
+        console.log("Fetching listings");
         const response = await fetch('/api/listings/my-listings');
+        
         if (!response.ok) {
+          console.error("Failed to fetch listings with status:", response.status);
           throw new Error('Failed to fetch listings');
         }
+        
         const data = await response.json();
+        console.log("Listings data received:", data);
         setListings(data.listings);
       } catch (err) {
+        console.error("Listings error:", err);
         setError('Failed to load listings');
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchUserData();
-    fetchListings();
+    const loadData = async () => {
+      setLoading(true);
+      const isAuthenticated = await fetchUserData();
+      
+      if (isAuthenticated) {
+        await fetchListings();
+      }
+      
+      setLoading(false);
+    };
+
+    loadData();
   }, [router]);
 
   const formatDate = (date: string) => {

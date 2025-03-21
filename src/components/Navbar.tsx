@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { FaFacebook, FaInstagram, FaXTwitter } from 'react-icons/fa6';
 
 interface User {
@@ -14,23 +14,29 @@ interface User {
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const checkAuth = async () => {
+    try {
+      console.log('Checking auth status...');
+      const response = await fetch('/api/auth/verify');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Auth status:', data);
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setUser(null);
+    }
+  };
 
   useEffect(() => {
-    // Check if user is logged in by verifying token
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/auth/verify');
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-      }
-    };
-
+    // Check auth status when component mounts and when pathname changes
     checkAuth();
-  }, []);
+  }, [pathname]);
 
   const handleLogout = async () => {
     try {

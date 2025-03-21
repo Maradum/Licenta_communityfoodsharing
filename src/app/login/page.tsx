@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Form, Input } from '@/components/Form/Form';
 import { Button } from '@/components/Button/Button';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,6 +34,7 @@ export default function LoginPage() {
     }
 
     try {
+      console.log('Attempting login with:', formData.email);
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -45,14 +48,29 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
+      console.log('Login successful, user role:', data.user.role);
 
       // Redirect based on user role
       if (data.user.role === 'admin') {
-        window.location.href = '/admin/dashboard';
+        console.log('Redirecting admin to dashboard...');
+        // Try both redirection methods for robustness
+        try {
+          router.push('/admin/dashboard');
+        } catch (routerError) {
+          console.error('Router push failed, using window.location fallback', routerError);
+          window.location.href = '/admin/dashboard';
+        }
       } else {
-        window.location.href = '/dashboard';
+        console.log('Redirecting user to dashboard...');
+        try {
+          router.push('/dashboard');
+        } catch (routerError) {
+          console.error('Router push failed, using window.location fallback', routerError);
+          window.location.href = '/dashboard';
+        }
       }
     } catch (error) {
+      console.error('Login error:', error);
       setErrors(prev => ({
         ...prev,
         general: 'Invalid email or password',

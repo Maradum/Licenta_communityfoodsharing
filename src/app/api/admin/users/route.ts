@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import jwt from 'jsonwebtoken';
 import { Sequelize, QueryTypes } from 'sequelize';
 import { AppError } from '@/types/error';
 
@@ -22,6 +22,7 @@ export async function GET(request: Request) {
     const token = request.headers.get('cookie')?.split('token=')[1]?.split(';')[0];
     
     if (!token) {
+      console.log('No authentication token found');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -29,19 +30,22 @@ export async function GET(request: Request) {
     }
 
     try {
-      const verified = await jwtVerify(
+      const payload = jwt.verify(
         token,
-        new TextEncoder().encode(process.env.JWT_SECRET || 'default_secret_key_for_development')
-      );
+        process.env.JWT_SECRET || 'default_secret_key_for_development'
+      ) as { userId?: string; role?: string; name?: string };
       
-      const payload = verified.payload as { role?: string };
       if (payload.role !== 'admin') {
+        console.log(`User ${payload.name} (${payload.userId}) attempted to access admin endpoint with role ${payload.role}`);
         return NextResponse.json(
           { error: 'Unauthorized - Admin access required' },
           { status: 403 }
         );
       }
+      
+      console.log(`Admin ${payload.name} (${payload.userId}) accessing users list`);
     } catch (error) {
+      console.error('Token verification failed:', error);
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
@@ -65,6 +69,8 @@ export async function GET(request: Request) {
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
+    
+    console.log(`Fetching users with pagination: page=${page}, limit=${limit}, offset=${offset}`);
     
     // Query to get users
     const query = `
@@ -91,6 +97,7 @@ export async function GET(request: Request) {
     });
     
     const total = (countResult[0] as any).total;
+    console.log(`Retrieved ${users.length} users out of ${total} total`);
 
     // Transform user data to match expected format in frontend
     users = users.map((user: any) => ({

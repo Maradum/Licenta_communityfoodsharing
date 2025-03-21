@@ -18,6 +18,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      console.log('Attempting admin login with:', formData.email);
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -32,15 +33,26 @@ export default function AdminLogin() {
         throw new Error(data.error || 'Login failed');
       }
 
+      console.log('Login successful, user role:', data.user.role);
+      
       if (data.user.role !== 'admin') {
         throw new Error('Unauthorized - Admin access only');
       }
 
       // Successful admin login - redirect to admin dashboard
-      router.push('/admin/dashboard');
+      console.log('Redirecting admin to dashboard...');
+      try {
+        // First try using Next.js router
+        router.push('/admin/dashboard');
+      } catch (routerError) {
+        console.error('Router push failed, falling back to window.location', routerError);
+      }
+      
       // Force a page refresh to ensure middleware picks up the new token
+      // This runs regardless of whether router.push succeeded
       window.location.href = '/admin/dashboard';
     } catch (err) {
+      console.error('Admin login error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);

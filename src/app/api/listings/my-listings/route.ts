@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import jwt from 'jsonwebtoken';
 import listingsData from '@/data/listings.json';
 
 export async function GET(request: Request) {
@@ -16,20 +16,19 @@ export async function GET(request: Request) {
     // Doar dacă avem token, încercăm să-l verificăm
     if (token) {
       try {
-        const verified = await jwtVerify(
+        const payload = jwt.verify(
           token,
-          new TextEncoder().encode(process.env.JWT_SECRET || 'default_secret_key_for_development')
-        );
+          process.env.JWT_SECRET || 'default_secret_key_for_development'
+        ) as { userId?: string, name?: string, email?: string };
         
-        const payload = verified.payload as { id?: string, email?: string };
-        if (payload.id) {
-          userId = payload.id;
-          userName = payload.email?.split('@')[0] || 'User';
+        if (payload.userId) {
+          userId = payload.userId;
+          userName = payload.name || payload.email?.split('@')[0] || 'User';
         }
         
         console.log(`User ${userName} (${userId}) requesting listings`);
       } catch (error) {
-        console.log('Token verification failed, using demo data');
+        console.log('Token verification failed, using demo data:', error);
         // Nu aruncăm eroare, continuăm cu userId demo
       }
     } else {
