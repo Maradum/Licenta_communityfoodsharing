@@ -66,8 +66,10 @@ export default function SignupPage() {
         throw new Error('Signup failed');
       }
 
-      // Handle successful signup
-      window.location.href = '/login';
+      const data = await response.json();
+      
+      // Handle successful signup - redirect to home page or specified redirect
+      window.location.href = data.redirectTo || '/';
     } catch (error) {
       setErrors(prev => ({
         ...prev,

@@ -38,24 +38,19 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'create
 
 // User model class
 export class User extends Model<UserAttributes, UserCreationAttributes> {
-  // Method to compare password for login
-  public async comparePassword(candidatePassword: string): Promise<boolean> {
+  /**
+   * Verifies if a password matches the hashed password in the user record
+   * @param candidatePassword - The password to verify
+   * @returns true if the password matches, false otherwise
+   */
+  public async verifyPassword(candidatePassword: string): Promise<boolean> {
+    const hashedPassword = this.getDataValue('password');
+    if (!hashedPassword) return false;
+    
     try {
-      console.log('Comparing passwords:');
-      const storedPassword = this.getDataValue('password');
-      console.log('- Stored hash length:', storedPassword.length);
-      console.log('- Candidate password length:', candidatePassword.length);
-      
-      // For debugging only - DO NOT KEEP THIS IN PRODUCTION
-      if (process.env.DEBUG === 'true') {
-        console.log('- First 20 chars of hash:', storedPassword.substring(0, 20) + '...');
-      }
-      
-      const isMatch = await bcrypt.compare(candidatePassword, storedPassword);
-      console.log('- Password match result:', isMatch);
-      return isMatch;
+      return await bcrypt.compare(candidatePassword, hashedPassword);
     } catch (error) {
-      console.error('Error comparing passwords:', error);
+      console.error('Error verifying password:', error);
       return false;
     }
   }
@@ -121,38 +116,39 @@ User.init(
     timestamps: true, // Enables createdAt and updatedAt
     hooks: {
       beforeCreate: async (user: User) => {
-        const password = user.getDataValue('password');
-        if (password) {
-          console.log('Hashing password during user creation:');
-          console.log('- Original password length:', password.length);
-          
-          const salt = await bcrypt.genSalt(10);
-          const hashedPassword = await bcrypt.hash(password, salt);
-          user.setDataValue('password', hashedPassword);
-          
-          console.log('- Hashed password length:', hashedPassword.length);
-          console.log('- First 20 chars of hash:', hashedPassword.substring(0, 20) + '...');
+        try {
+          const password = user.getDataValue('password');
+          if (password && !password.startsWith('$2')) {
+            // Only hash if password is not already hashed
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            user.setDataValue('password', hashedPassword);
+          }
+        } catch (error) {
+          console.error('Error hashing password:', error);
+          throw error;
         }
       },
       beforeUpdate: async (user: User) => {
-        if ((user as any).changed('password')) {
-          const password = user.getDataValue('password');
-          console.log('Hashing password during user update:');
-          console.log('- Original password length:', password.length);
-          
-          const salt = await bcrypt.genSalt(10);
-          const hashedPassword = await bcrypt.hash(password, salt);
-          user.setDataValue('password', hashedPassword);
-          
-          console.log('- Hashed password length:', hashedPassword.length);
-          console.log('- First 20 chars of hash:', hashedPassword.substring(0, 20) + '...');
+        try {
+          if ((user as any).changed('password')) {
+            const password = user.getDataValue('password');
+            if (password && !password.startsWith('$2')) {
+              // Only hash if password is not already hashed
+              const salt = await bcrypt.genSalt(10);
+              const hashedPassword = await bcrypt.hash(password, salt);
+              user.setDataValue('password', hashedPassword);
+            }
+          }
+        } catch (error) {
+          console.error('Error hashing password on update:', error);
+          throw error;
         }
       },
     },
   }
 );
 
-// Remove initUserModel as it's no longer needed
 // Initialize model automatically
 sequelize.authenticate()
   .then(() => console.log('MySQL Database Connected'))

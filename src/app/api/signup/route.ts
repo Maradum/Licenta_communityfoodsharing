@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import { User } from '@/server/models/User';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -39,25 +38,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Hash password
-    console.log('Hashing password...');
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    console.log('Password hashed, length:', hashedPassword.length);
-
     // Generate UUID for user ID
     const userId = uuidv4();
 
-    // Create new user using the User model
+    // Create new user and let Sequelize hooks handle password hashing
+    console.log('Creating user with ID:', userId);
     const user = await User.create({
       id: userId,
       email,
-      password: hashedPassword,
+      password,
       name,
       role
     });
 
-    console.log('User created with ID:', userId);
+    console.log('User created successfully');
 
     // Generate JWT token
     const token = jwt.sign(
@@ -77,7 +71,9 @@ export async function POST(request: Request) {
         email,
         name,
         role,
-      }
+      },
+      success: true,
+      redirectTo: '/'
     });
 
     response.cookies.set({
