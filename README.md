@@ -37,31 +37,19 @@ A platform for sharing surplus food within communities to reduce waste and help 
 
 ## Demo Accounts
 
-You can use the following accounts to test the application:
+Currently, this application does not include predefined demo accounts.  
+You can test the app by creating a new user via the Sign Up page.
 
-### Admin Account
-- **Email:** admin@foodsharing.com
-- **Password:** admin123
-- **Features:** Access the admin dashboard to manage users
+### Account Role
 
-### Regular User Account
-- **Email:** mariana@demo.uk
-- **Password:** password123
-- **Features:** View food listings, profile management
+Users can sign up either as:
+- **Food Donor** – users who wish to donate food.
+- **Food Receiver** – users who are looking to receive food support.
 
-## Demo Walkthrough
+> 🔐 Admin role is not implemented in the current version.
 
-### Admin Demo
-1. Log in with the admin account credentials
-2. Navigate to the admin dashboard at `/admin/dashboard`
-3. View all registered users
-4. Manage user accounts (view status, role, etc.)
 
-### User Demo
-1. Log in with the regular user account
-2. View your dashboard with food listings
-3. Explore available food items on the search page
-4. View detailed information about a specific food listing
+
 
 ## Build for Production
 
