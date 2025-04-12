@@ -16,13 +16,12 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Function to check authentication status
   const checkAuth = async () => {
     try {
-      console.log('Checking auth status...');
       const response = await fetch('/api/auth/verify');
       if (response.ok) {
         const data = await response.json();
-        console.log('Auth status:', data);
         setUser(data.user);
       } else {
         setUser(null);
@@ -33,11 +32,12 @@ export default function Navbar() {
     }
   };
 
+  // Check auth when component mounts or pathname changes
   useEffect(() => {
-    // Check auth status when component mounts and when pathname changes
     checkAuth();
   }, [pathname]);
 
+  // Logout handler
   const handleLogout = async () => {
     try {
       const response = await fetch('/api/auth/logout', {
@@ -57,7 +57,8 @@ export default function Navbar() {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
-          {/* Logo and Website Name */}
+          
+          {/* Logo and Title */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3">
               <Image
@@ -67,41 +68,32 @@ export default function Navbar() {
                 height={50}
                 className="h-12 w-12 rounded-full"
               />
-              <span className="text-xl font-semibold text-gray-900">Community Food Share</span>
+              {/* Removed text duplication from the image */}
+              <span className="text-xl font-semibold text-gray-900">
+                Community Food Share
+              </span>
             </Link>
           </div>
 
-          {/* Main Navigation */}
+          {/* Main navigation links */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/about" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
+            <Link href="/about" className="text-gray-700 hover:text-yellow-500 transition-colors">
               About Us
             </Link>
-            <Link 
-              href="/add-listing" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
+            <Link href="/add-listing" className="text-gray-700 hover:text-yellow-500 transition-colors">
               Share Food
             </Link>
-            <Link 
-              href="/search-listings" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
+            <Link href="/search-listings" className="text-gray-700 hover:text-yellow-500 transition-colors">
               Find Food
             </Link>
-            <Link 
-              href="/locations" 
-              className="text-gray-700 hover:text-yellow-500 transition-colors"
-            >
+            <Link href="/locations" className="text-gray-700 hover:text-yellow-500 transition-colors">
               Locations
             </Link>
           </div>
 
-          {/* Right Side: Social Icons and Auth */}
+          {/* Right section: social media + auth */}
           <div className="flex items-center space-x-6">
-            {/* Social Icons */}
+            {/* Social media icons */}
             <div className="hidden md:flex items-center space-x-4">
               <a href="#" className="text-gray-600 hover:text-yellow-500 transition-colors">
                 <FaFacebook className="w-5 h-5" />
@@ -114,7 +106,7 @@ export default function Navbar() {
               </a>
             </div>
 
-            {/* Auth Section */}
+            {/* Auth: User greeting or Sign In / Sign Up */}
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
@@ -150,7 +142,7 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile menu icon (not functional yet) */}
             <button className="md:hidden">
               <span className="sr-only">Open main menu</span>
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,4 +154,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-} 
+}

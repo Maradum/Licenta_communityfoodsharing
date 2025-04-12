@@ -38,48 +38,29 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    console.log("AdminDashboard component mounted");
-    
     const verifyAdminAuth = async () => {
       try {
-        console.log("Verifying admin authentication");
         const response = await fetch('/api/auth/verify');
-        
-        if (!response.ok) {
-          console.error("Auth verification failed with status:", response.status);
-          throw new Error('Not authenticated');
-        }
-        
+        if (!response.ok) throw new Error('Not authenticated');
         const data = await response.json();
-        console.log("Auth data received:", data);
-        
-        if (data.user.role !== 'admin') {
-          console.error("User is not an admin, redirecting");
-          throw new Error('Not authorized as admin');
-        }
-        
+        if (data.user.role !== 'admin') throw new Error('Not authorized as admin');
         return true;
       } catch (err) {
-        console.error("Admin authentication error:", err);
-        console.log("Redirecting to admin login page");
         router.push('/admin/login');
         return false;
       }
     };
-    
+
     const loadAdminData = async () => {
       const isAdminAuthenticated = await verifyAdminAuth();
-      if (isAdminAuthenticated) {
-        await fetchUsers();
-      }
+      if (isAdminAuthenticated) await fetchUsers();
     };
-    
+
     loadAdminData();
   }, [router]);
 
   const fetchUsers = async () => {
     try {
-      console.log("Fetching users data");
       setLoading(true);
       const queryParams = new URLSearchParams({
         page: pagination.page.toString(),
@@ -90,15 +71,9 @@ export default function AdminDashboard() {
       });
 
       const response = await fetch(`/api/admin/users?${queryParams}`);
-      
-      if (!response.ok) {
-        console.error("Failed to fetch users with status:", response.status);
-        throw new Error('Failed to fetch users');
-      }
-      
+      if (!response.ok) throw new Error('Failed to fetch users');
+
       const data = await response.json();
-      console.log("Users data received:", data);
-      
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (err) {
@@ -118,9 +93,9 @@ export default function AdminDashboard() {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('ro-RO', {
+    return new Date(date).toLocaleDateString('en-GB', {
       year: 'numeric',
-      month: 'long',
+      month: 'numeric',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
@@ -133,7 +108,7 @@ export default function AdminDashboard() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
-      
+
       {/* Filters */}
       <div className="mb-6 flex gap-4">
         <select
@@ -236,4 +211,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-} 
+}

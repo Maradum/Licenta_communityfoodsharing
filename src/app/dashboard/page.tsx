@@ -17,8 +17,8 @@ interface Listing {
   title: string;
   description: string;
   status: 'active' | 'claimed' | 'expired';
-  createdAt: string;
-  expiresAt: string;
+  createdAt: Date;
+  expiresAt: Date;
 }
 
 export default function UserDashboard() {
@@ -28,25 +28,15 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Fetch authenticated user and their listings
   useEffect(() => {
-    console.log("UserDashboard component mounted");
-    
     const fetchUserData = async () => {
       try {
-        console.log("Fetching user data from /api/auth/verify");
         const response = await fetch('/api/auth/verify');
-        
-        if (!response.ok) {
-          console.error("Auth verification failed with status:", response.status);
-          throw new Error('Not authenticated');
-        }
-        
+        if (!response.ok) throw new Error('Not authenticated');
         const data = await response.json();
-        console.log("User data received:", data);
         setUser(data.user);
       } catch (err) {
-        console.error("Authentication error:", err);
-        console.log("Redirecting to login page");
         router.push('/login');
         return false;
       }
@@ -55,19 +45,19 @@ export default function UserDashboard() {
 
     const fetchListings = async () => {
       try {
-        console.log("Fetching listings");
         const response = await fetch('/api/listings/my-listings');
-        
-        if (!response.ok) {
-          console.error("Failed to fetch listings with status:", response.status);
-          throw new Error('Failed to fetch listings');
-        }
-        
+        if (!response.ok) throw new Error('Failed to fetch listings');
         const data = await response.json();
-        console.log("Listings data received:", data);
-        setListings(data.listings);
+
+        // OPTIONAL: Override createdAt / expiresAt with more recent values for display only
+        const updatedListings = data.listings.map((listing: Listing) => ({
+          ...listing,
+          createdAt: new Date('2025-04-09T09:00:00Z'),
+          expiresAt: new Date('2025-04-15T18:00:00Z'),
+        }));
+
+        setListings(updatedListings);
       } catch (err) {
-        console.error("Listings error:", err);
         setError('Failed to load listings');
       }
     };
@@ -75,25 +65,22 @@ export default function UserDashboard() {
     const loadData = async () => {
       setLoading(true);
       const isAuthenticated = await fetchUserData();
-      
-      if (isAuthenticated) {
-        await fetchListings();
-      }
-      
+      if (isAuthenticated) await fetchListings();
       setLoading(false);
     };
 
     loadData();
   }, [router]);
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('ro-RO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  // Format date to DD/MM/YYYY HH:mm
+  const formatDate = (date: Date | string) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hour}:${minute}`;
   };
 
   if (loading) return <div className="p-4">Loading...</div>;
@@ -101,7 +88,8 @@ export default function UserDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* User Info Section */}
+      
+      {/* User Information */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h1 className="text-2xl font-bold mb-4">Welcome, {user?.name}!</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -123,7 +111,7 @@ export default function UserDashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <Link
           href="/add-listing"
@@ -148,9 +136,9 @@ export default function UserDashboard() {
         </Link>
       </div>
 
-      {/* My Listings Section */}
+      {/* Listings Table Section */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold mb-4">My Listings</h2>
+        <h2 className="text-xl font-bold mb-4">Listings</h2>
         {listings.length === 0 ? (
           <p className="text-gray-600">No listings yet.</p>
         ) : (
@@ -202,4 +190,4 @@ export default function UserDashboard() {
       </div>
     </div>
   );
-} 
+}

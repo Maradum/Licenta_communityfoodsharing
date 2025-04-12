@@ -1,20 +1,93 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type ListingDuration } from '@/types/listing';
 
 export default function AddListingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
 
+  useEffect(() => {
+    async function fetchInitialData() {
+      try {
+        const [catRes, cityRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/cities'),
+        ]);
+
+        const categoriesData = await catRes.json();
+        const citiesData = await cityRes.json();
+
+        setCategories(categoriesData);
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      }
+    }
+
+    fetchInitialData();
+  }, []);
+
+useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+  
+    fetchCategories();
+  }, []);
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Implement form submission
-    setLoading(false);
-    router.push('/search-listings');
+  
+    const formData = new FormData(e.currentTarget);
+  
+    const listing = {
+      title: formData.get('title'),
+      description: formData.get('description'),
+      category: formData.get('category'),
+      location: formData.get('location'),
+      userName: formData.get('userName'),
+      phoneNumber: formData.get('phoneNumber'),
+      foodType: formData.get('foodType'),
+      listingDuration: formData.get('listingDuration'),
+      expiryDate: formData.get('expiryDate'),
+      expiryNote: formData.get('expiryNote'),
+      // image: formData.get('image') // Image handling to be added separately
+    };
+  
+    try {
+      const res = await fetch('/api/listings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(listing),
+      });
+  
+      if (res.ok) {
+        router.push('/listings'); // sau /search-listings dacă ai acea pagină
+      } else {
+        const errorData = await res.json();
+        console.error('Failed to create listing:', errorData);
+        alert('Error: ' + (errorData.message || 'Failed to create listing.'));
+      }
+    } catch (error) {
+      console.error('Error submitting listing:', error);
+      alert('Submission failed. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -54,39 +127,38 @@ export default function AddListingPage() {
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-              Category *
-            </label>
-            <select
-              id="category"
-              name="category"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-            >
-              <option value="">Select a category</option>
-              <option value="vegetables">Vegetables</option>
-              <option value="fruits">Fruits</option>
-              <option value="dairy">Dairy</option>
-              <option value="bakery">Bakery</option>
-              <option value="canned">Canned Food</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+  <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+    Category *
+  </label>
+  <select
+    id="category"
+    name="category"
+    required
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+  >
+    <option value="">Select a category</option>
+    {categories.map((cat: any) => (
+      <option key={cat.id} value={cat.name}>
+        {cat.name}
+      </option>
+    ))}
+  </select>
+</div>
 
-          <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-              Location *
-            </label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              placeholder="e.g., London"
-            />
-          </div>
-        </div>
+<select
+  id="location"
+  name="location"
+  required
+  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+>
+  <option value="">Select a city</option>
+  {cities.map((city: any) => (
+    <option key={city.id} value={city.name}>
+      {city.name}
+    </option>
+  ))}
+</select>
+
 
         {/* Contact Information */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">

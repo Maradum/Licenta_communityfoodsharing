@@ -1,100 +1,72 @@
-import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { User } from '@/server/models/User';
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import db from "@/lib/db";
 
-// Define user type for the query result
-interface UserRecord {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  role: string;
-  [key: string]: any; // For any other fields
-}
+const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    const { email, password } = await req.json();
 
-    console.log(`Login attempt for email: ${email}`);
-
-    // Basic validation
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { message: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    // Find user using the User model
-    const user = await User.findOne({
-      where: { email }
-    });
-    
-    if (!user) {
-      console.log('User not found');
+    // Check if user exists in the database
+    const [user] = await db.query("SELECT * FROM User WHERE email = ?", [email]);
+    const foundUser = (user as any[])[0];
+
+    if (!foundUser) {
+      console.log("User not found:", email);
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { message: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-    console.log('User found:', user.get('email'));
-    
-    // Verify password using the User model's method
-    const isMatch = await user.verifyPassword(password);
-    console.log('Password verification result:', isMatch);
-    
-    if (!isMatch) {
-      console.log('Invalid password');
+    // Compare submitted password with stored hash
+    const validPassword = await bcrypt.compare(password, foundUser.password);
+    if (!validPassword) {
+      console.log("Invalid password for:", email);
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { message: "Invalid credentials" },
         { status: 401 }
       );
     }
-
-    // Update last login
-    user.setDataValue('lastLogin', new Date());
-    await user.save();
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
-        userId: user.getDataValue('id'),
-        name: user.getDataValue('name'),
-        role: user.getDataValue('role')
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: '24h' }
+      { id: foundUser.id, email: foundUser.email, role: foundUser.role },
+      JWT_SECRET,
+      { expiresIn: "1h" }
     );
 
-    // Set HTTP-Only cookie with the token
-    const response = NextResponse.json({
-      user: {
-        id: user.getDataValue('id'),
-        email: user.getDataValue('email'),
-        name: user.getDataValue('name'),
-        role: user.getDataValue('role'),
-      }
-    });
+    // Return token in cookie
+    const response = NextResponse.json(
+      {
+        message: "Login successful",
+        user: {
+          id: foundUser.id,
+          email: foundUser.email,
+          role: foundUser.role
+        }
+      },
+      { status: 200 }
+    );
+    
+    response.cookies.set("token", token, { httpOnly: true });
 
-    response.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 // 24 hours
-    });
-
-    console.log('Login successful');
     return response;
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch (error: any) {
+    console.error("Login error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { message: "Internal server error", error: error.message },
       { status: 500 }
     );
   }
-} 
+}
+

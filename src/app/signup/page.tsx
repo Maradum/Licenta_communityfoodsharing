@@ -31,7 +31,7 @@ export default function SignupPage() {
     e.preventDefault();
     setErrors({});
 
-    // Basic validation
+    // Validation
     if (!formData.name) {
       setErrors(prev => ({ ...prev, name: 'Name is required' }));
       return;
@@ -54,7 +54,8 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch('/api/signup', {
+      // ✅ Corrected endpoint here
+      const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,8 +68,8 @@ export default function SignupPage() {
       }
 
       const data = await response.json();
-      
-      // Handle successful signup - redirect to home page or specified redirect
+
+      // Redirect after successful signup
       window.location.href = data.redirectTo || '/';
     } catch (error) {
       setErrors(prev => ({
@@ -170,4 +171,4 @@ export default function SignupPage() {
       </div>
     </div>
   );
-} 
+}
