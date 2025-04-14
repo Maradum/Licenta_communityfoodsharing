@@ -126,3 +126,4 @@ To start the production server locally:
 ```bash
 npm start
 ```
+📌 Note: Although this repository is hosted under a collaborator's GitHub account, all code, development work, and documentation were created and maintained by Mariana Dumitriu (Student ID: 2009552).
