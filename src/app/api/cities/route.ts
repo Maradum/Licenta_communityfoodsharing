@@ -12,7 +12,7 @@ export async function GET() {
 
   try {
     const [rows] = await pool.query('SELECT id, name FROM city');
-    return NextResponse.json(rows);
+    return NextResponse.json(Array.isArray(rows) ? rows : []);
   } catch (error) {
     console.error('Error fetching cities:', error);
     return NextResponse.json({ message: 'Failed to load cities' }, { status: 500 });
