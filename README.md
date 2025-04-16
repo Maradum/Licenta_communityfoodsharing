@@ -64,7 +64,9 @@ npm start
 ```
 
 ## Deployment to Vercel
-
+Live Demo
+You can access the deployed application at:
+🔗 https://licenta-communityfoodsharing.vercel.app
 ### Environment Variables
 
 When deploying to Vercel, set:
@@ -101,6 +103,7 @@ Also includes `.npmrc` with `legacy-peer-deps=true` to ensure correct installs.
 # Clone the repository
 git clone https://github.com/Maradum/Licenta_communityfoodsharing.git
 cd Licenta_communityfoodsharing
+
 
 # Install dependencies
 npm install
