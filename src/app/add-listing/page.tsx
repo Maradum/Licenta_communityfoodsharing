@@ -3,13 +3,24 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Define the structure of City and Category objects
+type City = {
+  id: number;
+  name: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
+};
+
 export default function AddListingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [cities, setCities] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
 
-  // Fetch initial categories and cities when page loads
+  // Fetch cities and categories when the component loads
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -23,15 +34,18 @@ export default function AddListingPage() {
 
         setCategories(categoriesData);
         setCities(citiesData);
+        console.log("Fetched cities:", citiesData);
       } catch (error) {
         console.error('Error loading initial data:', error);
+        
+
       }
     }
 
     fetchInitialData();
   }, []);
 
-  // Handle form submit
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -49,7 +63,6 @@ export default function AddListingPage() {
       listingDuration: formData.get('listingDuration'),
       expiryDate: formData.get('expiryDate'),
       expiryNote: formData.get('expiryNote'),
-      // image: formData.get('image') // to be handled in the future
     };
 
     try {
@@ -73,7 +86,7 @@ export default function AddListingPage() {
     }
   };
 
-  // JSX returned to the page
+  // Page JSX
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 text-yellow-600">Add New Listing</h1>
@@ -97,7 +110,7 @@ export default function AddListingPage() {
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
             <select id="category" name="category" required className="w-full px-3 py-2 border border-gray-300 rounded-md">
               <option value="">Select a category</option>
-              {categories.map((cat: any) => (
+              {Array.isArray(categories) && categories.map((cat) => (
                 <option key={cat.id} value={cat.name}>{cat.name}</option>
               ))}
             </select>
@@ -107,7 +120,7 @@ export default function AddListingPage() {
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
             <select id="location" name="location" required className="w-full px-3 py-2 border border-gray-300 rounded-md">
               <option value="">Select a city</option>
-              {cities.map((city: any) => (
+              {Array.isArray(cities) && cities.map((city) => (
                 <option key={city.id} value={city.name}>{city.name}</option>
               ))}
             </select>
@@ -169,6 +182,7 @@ export default function AddListingPage() {
           <input type="file" id="image" name="image" accept="image/*" required className="w-full px-3 py-2 border border-gray-300 rounded-md" />
         </div>
 
+        {/* Buttons */}
         <div className="flex justify-end space-x-4">
           <button type="button" onClick={() => router.back()} className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
             Cancel
