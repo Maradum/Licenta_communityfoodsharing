@@ -1,213 +1,108 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
-  _id: string;
+  _id: number;
   name: string;
   email: string;
   role: string;
-  status: string;
   createdAt: string;
-  lastLogin: string;
-}
-
-interface PaginationData {
-  total: number;
-  pages: number;
-  page: number;
-  limit: number;
+  lastLogin: string | null;
 }
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
-  const [pagination, setPagination] = useState<PaginationData>({
-    total: 0,
-    pages: 0,
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
+    totalPages: 1,
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [filters, setFilters] = useState({
-    role: '',
-    status: '',
-    search: '',
-  });
-
-  useEffect(() => {
-    const verifyAdminAuth = async () => {
-      try {
-        const response = await fetch('/api/auth/verify');
-        if (!response.ok) throw new Error('Not authenticated');
-        const data = await response.json();
-        if (data.user.role !== 'admin') throw new Error('Not authorized as admin');
-        return true;
-      } catch (err) {
-        router.push('/admin/login');
-        return false;
-      }
-    };
-
-    const loadAdminData = async () => {
-      const isAdminAuthenticated = await verifyAdminAuth();
-      if (isAdminAuthenticated) await fetchUsers();
-    };
-
-    loadAdminData();
-  }, [router]);
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
-      const queryParams = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        ...(filters.role && { role: filters.role }),
-        ...(filters.status && { status: filters.status }),
-        ...(filters.search && { search: filters.search }),
+      const response = await fetch(`/api/admin/users?page=${pagination.page}&limit=${pagination.limit}`, {
+        method: 'GET',
+        credentials: 'include', // ✅ Very important to send the cookie (token)
       });
 
-      const response = await fetch(`/api/admin/users?${queryParams}`);
-      if (!response.ok) throw new Error('Failed to fetch users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
 
       const data = await response.json();
       setUsers(data.users);
-      setPagination(data.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.pagination.pages,
+      }));
+
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError('Failed to fetch users');
     }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, [pagination.page, filters]);
+  }, [pagination.page]);
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  if (loading) return <div className="p-4">Loading...</div>;
-  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
+  if (error) {
+    return <div className="text-red-500 p-4">Error: {error}</div>;
+  }
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
-
-      {/* Filters */}
-      <div className="mb-6 flex gap-4">
-        <select
-          className="border p-2 rounded"
-          value={filters.role}
-          onChange={(e) => handleFilterChange('role', e.target.value)}
-        >
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="donor">Donor</option>
-          <option value="beneficiary">Beneficiary</option>
-        </select>
-
-        <select
-          className="border p-2 rounded"
-          value={filters.status}
-          onChange={(e) => handleFilterChange('status', e.target.value)}
-        >
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="suspended">Suspended</option>
-        </select>
-
-        <input
-          type="text"
-          placeholder="Search by name or email"
-          className="border p-2 rounded"
-          value={filters.search}
-          onChange={(e) => handleFilterChange('search', e.target.value)}
-        />
-      </div>
-
-      {/* Users Table */}
+      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border rounded-lg">
-          <thead className="bg-gray-50">
+        <table className="min-w-full bg-white border rounded-lg shadow">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Role</th>
+              <th className="p-3 text-left">Created At</th>
+              <th className="p-3 text-left">Last Login</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {users.map((user) => (
+          <tbody>
+            {users.map(user => (
               <tr key={user._id}>
-                <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 
-                      user.role === 'donor' ? 'bg-green-100 text-green-800' : 
-                      'bg-blue-100 text-blue-800'}`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${user.status === 'active' ? 'bg-green-100 text-green-800' : 
-                      user.status === 'inactive' ? 'bg-gray-100 text-gray-800' : 
-                      'bg-red-100 text-red-800'}`}>
-                    {user.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">{formatDate(user.createdAt)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.lastLogin ? formatDate(user.lastLogin) : 'Never'}</td>
+                <td className="p-3">{user.name}</td>
+                <td className="p-3">{user.email}</td>
+                <td className="p-3 capitalize">{user.role}</td>
+                <td className="p-3">{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td className="p-3">{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="mt-4 flex justify-between items-center">
-        <div>
-          Total: {pagination.total} users
-        </div>
-        <div className="flex gap-2">
-          <button
-            className="px-3 py-1 border rounded disabled:opacity-50"
-            disabled={pagination.page === 1}
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-          >
-            Previous
-          </button>
-          <span className="px-3 py-1">
-            Page {pagination.page} of {pagination.pages}
-          </span>
-          <button
-            className="px-3 py-1 border rounded disabled:opacity-50"
-            disabled={pagination.page === pagination.pages}
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-          >
-            Next
-          </button>
-        </div>
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-6 space-x-4">
+        <button
+          onClick={() => setPagination(prev => ({ ...prev, page: Math.max(prev.page - 1, 1) }))}
+          disabled={pagination.page === 1}
+          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <span className="px-4 py-2">
+          Page {pagination.page} of {pagination.totalPages}
+        </span>
+
+        <button
+          onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.page + 1, pagination.totalPages) }))}
+          disabled={pagination.page === pagination.totalPages}
+          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

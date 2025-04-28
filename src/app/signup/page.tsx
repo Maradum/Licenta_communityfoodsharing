@@ -1,87 +1,69 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Form, Input, Select } from '@/components/Form/Form';
+import { Form, Input } from '@/components/Form/Form';
 import { Button } from '@/components/Button/Button';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'donor',
+    role: 'user', // Default role
   });
 
-  const [errors, setErrors] = useState<{
-    name?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    general?: string;
-  }>({});
-
-  const roleOptions = [
-    { value: 'donor', label: 'Donor' },
-    { value: 'beneficiary', label: 'Beneficiary' },
-  ];
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
-    // Validation
-    if (!formData.name) {
-      setErrors(prev => ({ ...prev, name: 'Name is required' }));
-      return;
-    }
-    if (!formData.email) {
-      setErrors(prev => ({ ...prev, email: 'Email is required' }));
-      return;
-    }
-    if (!formData.password) {
-      setErrors(prev => ({ ...prev, password: 'Password is required' }));
-      return;
-    }
-    if (formData.password.length < 8) {
-      setErrors(prev => ({ ...prev, password: 'Password must be at least 8 characters' }));
-      return;
-    }
     if (formData.password !== formData.confirmPassword) {
       setErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match' }));
       return;
     }
 
     try {
-      // ✅ Corrected endpoint here
+      // Signup
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
       });
 
       if (!response.ok) {
         throw new Error('Signup failed');
       }
 
+      // Redirect based on selected role
       const data = await response.json();
+      if (data.user.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
 
-      // Redirect after successful signup
-      window.location.href = data.redirectTo || '/';
     } catch (error) {
+      console.error('Signup error:', error);
       setErrors(prev => ({
         ...prev,
-        general: 'Failed to create account. Please try again.',
+        general: 'Signup failed. Please try again.',
       }));
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -93,15 +75,15 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Create your account
+          Create a new account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account?{' '}
+          Or{' '}
           <Link
             href="/login"
             className="font-medium text-yellow-500 hover:text-yellow-400"
           >
-            Sign in
+            sign in to your account
           </Link>
         </p>
       </div>
@@ -117,51 +99,58 @@ export default function SignupPage() {
           <Form onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Full name"
-              type="text"
               name="name"
+              type="text"
               value={formData.name}
               onChange={handleChange}
               error={errors.name}
               autoComplete="name"
             />
-
             <Input
               label="Email address"
-              type="email"
               name="email"
+              type="email"
               value={formData.email}
               onChange={handleChange}
               error={errors.email}
               autoComplete="email"
             />
-
             <Input
               label="Password"
-              type="password"
               name="password"
+              type="password"
               value={formData.password}
               onChange={handleChange}
               error={errors.password}
               autoComplete="new-password"
             />
-
             <Input
-              label="Confirm password"
-              type="password"
+              label="Confirm Password"
               name="confirmPassword"
+              type="password"
               value={formData.confirmPassword}
               onChange={handleChange}
               error={errors.confirmPassword}
               autoComplete="new-password"
             />
 
-            <Select
-              label="I want to"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              options={roleOptions}
-            />
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                I want to
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
+              >
+                <option value="user">User</option>
+                <option value="donor">Donor</option>
+                <option value="beneficiary">Beneficiary</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
 
             <Button type="submit" fullWidth>
               Create account
@@ -172,3 +161,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

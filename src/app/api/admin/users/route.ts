@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { Sequelize, QueryTypes } from 'sequelize';
 import { AppError } from '@/types/error';
 import mysql2 from 'mysql2';
 
-// ✅ Direct Sequelize setup using MySQL dialect
+// ✅ Setup Sequelize with MySQL
 const dbUrl = process.env.DATABASE_URL || 'mysql://root:DwpCyZFKlzRbbxVDBMUWFWzQpKzJhacS@mainline.proxy.rlwy.net:47569/railway';
 const sequelize = new Sequelize(dbUrl, {
   dialect: 'mysql',
@@ -17,64 +17,64 @@ const sequelize = new Sequelize(dbUrl, {
   },
 });
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    // ✅ Extract token from cookie header
-    const cookieHeader = request.headers.get('cookie');
-    const token = cookieHeader?.split('token=')[1]?.split(';')[0];
+    // ✅ Extract token from cookie
+    const token = request.cookies.get('token')?.value;
 
     if (!token) {
-      console.log('❌ No authentication token found');
+      console.error('❌ No token provided');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // ✅ Verify JWT token
+    let payload;
     try {
-      // ✅ Verify JWT token
-      const payload = jwt.verify(token, process.env.JWT_SECRET || 'default_secret_key_for_development') as {
-        userId?: string;
-        role?: string;
-        name?: string;
+      payload = jwt.verify(token, process.env.JWT_SECRET || 'default_secret_key_for_development') as {
+        userId: string;
+        role: string;
+        name: string;
       };
-
-      if (payload.role !== 'admin') {
-        console.log(`❌ Unauthorized access by user ${payload.name} (${payload.userId}) with role ${payload.role}`);
-        return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 });
-      }
-
-      console.log(`✅ Admin ${payload.name} (${payload.userId}) authenticated`);
     } catch (error) {
-      console.error('❌ Token verification failed:', error);
+      console.error('❌ Invalid token:', error);
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    // ✅ Check if user is admin
+    if (payload.role !== 'admin') {
+      console.error(`❌ Access denied for user ${payload.name} (${payload.userId})`);
+      return NextResponse.json({ error: 'Forbidden - Admins only' }, { status: 403 });
+    }
+
+    console.log(`✅ Admin verified: ${payload.name} (${payload.userId})`);
+
+    // ✅ Connect to database
     try {
-      // ✅ Test DB connection
       await sequelize.authenticate();
-      console.log('✅ Database connection successful');
-    } catch (error) {
-      console.error('❌ Database connection error:', error);
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+      console.log('✅ Database connected successfully');
+    } catch (dbError) {
+      console.error('❌ Database connection failed:', dbError);
+      return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
     }
 
     // ✅ Handle pagination
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
     const offset = (page - 1) * limit;
 
-    console.log(`📦 Fetching users - page=${page}, limit=${limit}, offset=${offset}`);
+    console.log(`📦 Fetching users: page=${page}, limit=${limit}, offset=${offset}`);
 
     // ✅ Query to fetch users
-    const query = `
+    const usersQuery = `
       SELECT id, name, email, role, status, createdAt, updatedAt, lastLogin
       FROM user
       ORDER BY createdAt DESC
       LIMIT ? OFFSET ?
     `;
+    const countQuery = `SELECT COUNT(*) AS total FROM user`;
 
-    const countQuery = `SELECT COUNT(*) as total FROM user`;
-
-    const users = await sequelize.query(query, {
+    const users = await sequelize.query(usersQuery, {
       replacements: [limit, offset],
       type: QueryTypes.SELECT,
     });
@@ -84,9 +84,10 @@ export async function GET(request: Request) {
     });
 
     const total = (countResult[0] as any).total;
-    console.log(`✅ Retrieved ${users.length} users out of ${total} total`);
 
-    // ✅ Format users for frontend
+    console.log(`✅ Retrieved ${users.length} users out of ${total}`);
+
+    // ✅ Format users
     const formattedUsers = users.map((user: any) => ({
       _id: user.id,
       ...user,
@@ -103,6 +104,7 @@ export async function GET(request: Request) {
         limit,
       },
     });
+
   } catch (error: unknown) {
     console.error('❌ Error fetching users:', error);
     const status = error instanceof AppError ? error.status : 500;

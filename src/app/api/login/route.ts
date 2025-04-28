@@ -38,14 +38,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate JWT token
+    // Generate JWT token valid for 7 days
     const token = jwt.sign(
-      { id: foundUser.id, email: foundUser.email, role: foundUser.role },
+      { userId: foundUser.id, email: foundUser.email, role: foundUser.role },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
-    // Return token in cookie
+    // Create a response
     const response = NextResponse.json(
       {
         message: "Login successful",
@@ -57,8 +57,15 @@ export async function POST(req: Request) {
       },
       { status: 200 }
     );
-    
-    response.cookies.set("token", token, { httpOnly: true });
+
+    // Set token cookie with security options
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", 
+      path: "/",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 // 7 days in seconds
+    });
 
     return response;
   } catch (error: any) {
@@ -69,4 +76,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
 

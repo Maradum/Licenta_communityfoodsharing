@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Define the structure of City and Category objects
 type City = {
   id: number;
   name: string;
@@ -20,7 +19,6 @@ export default function AddListingPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [cities, setCities] = useState<City[]>([]);
 
-  // Fetch cities and categories when the component loads
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -34,24 +32,20 @@ export default function AddListingPage() {
 
         setCategories(categoriesData);
         setCities(citiesData);
-        console.log("Fetched cities:", citiesData);
       } catch (error) {
         console.error('Error loading initial data:', error);
-        
-
       }
     }
 
     fetchInitialData();
   }, []);
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
+  
     const formData = new FormData(e.currentTarget);
-
+  
     const listing = {
       title: formData.get('title'),
       description: formData.get('description'),
@@ -64,16 +58,31 @@ export default function AddListingPage() {
       expiryDate: formData.get('expiryDate'),
       expiryNote: formData.get('expiryNote'),
     };
-
+  
     try {
-      const res = await fetch('/api/listings', {
+      // Extract the token from cookies
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+  
+      if (!token) {
+        alert('No token found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+  
+      const res = await fetch('/api/add-listing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(listing),
       });
-
+  
       if (res.ok) {
-        router.push('/listings');
+        router.push('/dashboard');
       } else {
         const errorData = await res.json();
         alert('Error: ' + (errorData.message || 'Failed to create listing.'));
@@ -85,14 +94,13 @@ export default function AddListingPage() {
       setLoading(false);
     }
   };
+  
 
-  // Page JSX
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 text-yellow-600">Add New Listing</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Info */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Basic Information</h2>
 
@@ -111,7 +119,9 @@ export default function AddListingPage() {
             <select id="category" name="category" required className="w-full px-3 py-2 border border-gray-300 rounded-md">
               <option value="">Select a category</option>
               {Array.isArray(categories) && categories.map((cat) => (
-                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
               ))}
             </select>
           </div>
@@ -121,13 +131,14 @@ export default function AddListingPage() {
             <select id="location" name="location" required className="w-full px-3 py-2 border border-gray-300 rounded-md">
               <option value="">Select a city</option>
               {Array.isArray(cities) && cities.map((city) => (
-                <option key={city.id} value={city.name}>{city.name}</option>
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Contact Info */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Contact Information</h2>
 
@@ -142,7 +153,6 @@ export default function AddListingPage() {
           </div>
         </div>
 
-        {/* Food Details */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Food Details</h2>
 
@@ -176,13 +186,11 @@ export default function AddListingPage() {
           </div>
         </div>
 
-        {/* Image Upload */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Image</h2>
           <input type="file" id="image" name="image" accept="image/*" required className="w-full px-3 py-2 border border-gray-300 rounded-md" />
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-end space-x-4">
           <button type="button" onClick={() => router.back()} className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
             Cancel

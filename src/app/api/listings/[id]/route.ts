@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
 
-// MySQL pool connection
+// Create MySQL connection pool
 const pool = mysql.createPool({
   host: 'mainline.proxy.rlwy.net',
   user: 'root',
@@ -10,9 +10,10 @@ const pool = mysql.createPool({
   port: 47569,
 });
 
+// GET - fetch listing by ID
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const [rows]: any = await pool.query('SELECT * FROM listings WHERE id = ?', [params.id]);
+    const [rows]: any = await pool.query('SELECT * FROM AddListings WHERE id = ?', [params.id]);
     const listing = rows.length > 0 ? rows[0] : null;
 
     if (!listing) {
@@ -22,17 +23,18 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(listing);
   } catch (error) {
     console.error('Error fetching listing:', error);
-    return NextResponse.json({ message: 'Error fetching listing' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to fetch listing' }, { status: 500 });
   }
 }
 
+// PUT - update listing by ID
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
     const { title, description } = body;
 
     const [result]: any = await pool.query(
-      'UPDATE listings SET title = ?, description = ? WHERE id = ?',
+      'UPDATE AddListings SET title = ?, description = ? WHERE id = ?',
       [title, description, params.id]
     );
 
@@ -40,10 +42,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Listing not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Listing updated successfully' });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating listing:', error);
-    return NextResponse.json({ message: 'Error updating listing' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to update listing' }, { status: 500 });
   }
 }
-
