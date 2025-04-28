@@ -9,6 +9,7 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
+    // ✅ Validate input
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if user exists in the database
+    // ✅ Check if user exists in the database
     const [user] = await db.query("SELECT * FROM User WHERE email = ?", [email]);
     const foundUser = (user as any[])[0];
 
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Compare submitted password with stored hash
+    // ✅ Compare submitted password with stored hash
     const validPassword = await bcrypt.compare(password, foundUser.password);
     if (!validPassword) {
       console.log("Invalid password for:", email);
@@ -38,14 +39,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate JWT token valid for 7 days
+    // ✅ Generate JWT token valid for 7 days
     const token = jwt.sign(
       { userId: foundUser.id, email: foundUser.email, role: foundUser.role },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Create a response
+    // ✅ Create response and set HttpOnly cookie
     const response = NextResponse.json(
       {
         message: "Login successful",
@@ -58,13 +59,14 @@ export async function POST(req: Request) {
       { status: 200 }
     );
 
-    // Set token cookie with security options
-    response.cookies.set("token", token, {
+    response.cookies.set({
+      name: "token",
+      value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 // 7 days in seconds
+      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
     });
 
     return response;

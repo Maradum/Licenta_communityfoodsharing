@@ -34,6 +34,7 @@ export default function SignupPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 🔥 THIS LINE (important)
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,

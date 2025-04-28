@@ -19,16 +19,16 @@ export async function POST(req: NextRequest) {
   try {
     const { name, email, password, role } = await req.json();
 
-    // Check if user already exists
+    // ✅ Check if user already exists
     const [existingUsers] = await pool.query('SELECT * FROM User WHERE email = ?', [email]);
     if ((existingUsers as any[]).length > 0) {
       return NextResponse.json({ message: 'Email already registered' }, { status: 400 });
     }
 
-    // Hash the password
+    // ✅ Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user
+    // ✅ Insert new user into database
     const [result] = await pool.query(
       'INSERT INTO User (name, email, password, role, createdAt) VALUES (?, ?, ?, ?, NOW())',
       [name, email, hashedPassword, role || 'user']
@@ -41,9 +41,11 @@ export async function POST(req: NextRequest) {
       { expiresIn: '7d' }
     );
 
-    // ✅ Set token in HttpOnly cookie
+    // ✅ Create response and set HttpOnly cookie
     const response = NextResponse.json({ message: 'Signup successful', user: { name, role } });
-    response.cookies.set('token', token, {
+    response.cookies.set({
+      name: 'token',
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -57,5 +59,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
   }
 }
-
 

@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
         role: string;
         name: string;
       };
-    } catch (error) {
-      console.error('❌ Invalid token:', error);
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    } catch (error: any) {
+      console.error('❌ Token verification error:', error.message || error);
+      return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
     }
 
     // ✅ Check if user is admin
@@ -65,14 +65,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`📦 Fetching users: page=${page}, limit=${limit}, offset=${offset}`);
 
-    // ✅ Query to fetch users
+    // ✅ Corrected table name: Users (not users)
     const usersQuery = `
       SELECT id, name, email, role, status, createdAt, updatedAt, lastLogin
-      FROM user
+      FROM Users
       ORDER BY createdAt DESC
       LIMIT ? OFFSET ?
     `;
-    const countQuery = `SELECT COUNT(*) AS total FROM user`;
+    const countQuery = `SELECT COUNT(*) AS total FROM Users`;
 
     const users = await sequelize.query(usersQuery, {
       replacements: [limit, offset],
