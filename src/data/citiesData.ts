@@ -15,7 +15,7 @@ export const citiesData = [
       description: 'A growing community of food sharing enthusiasts.',
       activeListings: 85,
       activeDonors: 28,
-      imageUrl: '/images/Manchester.jpg',
+      imageUrl: '/images/manchester.jpg',
     },
     {
       id: 3,
@@ -31,7 +31,7 @@ export const citiesData = [
       description: 'Emerging food sharing community.',
       activeListings: 60,
       activeDonors: 20,
-      imageUrl: '/images/Leeds.jpg',
+      imageUrl: '/images/leeds.jpg',
     },
     {
       id: 5,
@@ -39,7 +39,7 @@ export const citiesData = [
       description: 'Growing impact on food waste reduction.',
       activeListings: 70,
       activeDonors: 25,
-      imageUrl: '/images/Liverpool.jpg',
+      imageUrl: '/images/liverpool.jpg',
     },
     {
       id: 6,
